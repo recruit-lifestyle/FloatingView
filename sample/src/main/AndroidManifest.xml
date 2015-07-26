@@ -1,0 +1,52 @@
+<manifest
+    package="jp.co.recruit.floatingview"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <!-- 最前面表示時のパーミッション -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <!-- 削除ボタンと重なった時にバイブレーション -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <!-- 以下は広告用 -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version"/>
+        <activity
+            android:name="jp.co.recruit_lifestyle.sample.MainActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <!-- デモ画面 -->
+        <activity
+            android:name="jp.co.recruit_lifestyle.sample.ChatHeadActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:taskAffinity="jp.co.recruit.floatingview.ChatHeadActivity"/>
+        <!-- 広告 -->
+        <activity
+            android:name="com.google.android.gms.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+        <!-- デモ表示サービス -->
+        <service
+            android:name="jp.co.recruit_lifestyle.sample.service.ChatHeadService"
+            android:exported="false"/>
+        <!-- 広告表示サービス -->
+        <service
+            android:name="jp.co.recruit_lifestyle.sample.service.FloatingAdService"
+            android:exported="false"/>
+
+    </application>
+
+</manifest>

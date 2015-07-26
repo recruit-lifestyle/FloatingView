@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">FloatingView Sample</string>
+    <string name="chathead_content_title">デモチャット：アクティブ</string>
+    <string name="chathead_content_text">デモ実行中</string>
+    <string name="ad_content_title">デモ広告：アクティブ</string>
+    <string name="ad_content_text">デモ実行中</string>
+    <string name="charhead_click_message">クリック!</string>
+    <string name="error_load_ad">広告が読み込めなかったか、string.xmlの広告ユニットIDが正しく設定されていません</string>
+    <string name="ad_click_message">3秒後に広告アイコンが表示されます</string>
+    <string name="delete_demo">デモ表示を削除</string>
+    <string name="show_demo">デモ表示</string>
+    <string name="show_ad">広告表示</string>
+    <string name="ad_unit_id">ADD_YOUR_UNIT_ID</string>
+</resources>
