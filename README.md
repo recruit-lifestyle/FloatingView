@@ -9,8 +9,8 @@ AndroidのAPI 14以降に対応しています
   
   
 動作の詳細はYouTubeの動画を確認してください  
-[SimpleFloating](https://www.youtube.com/watch?v=UvpjbG7JBH0)  
-[FloatingAd](https://www.youtube.com/watch?v=VDyTVuimsrQ)
+[SimpleFloating](http://youtu.be/nb8M2p0agF4)  
+[FloatingAd](http://youtu.be/PmvbQzxSBU0)
 
 ## Requirements
 Target Sdk Version : 22  
