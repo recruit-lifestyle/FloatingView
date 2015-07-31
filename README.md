@@ -1,6 +1,6 @@
 # FloatingView
-The Android project is View to display information such as chat in front
-To API Level 14 or later are supported
+The Android project is View to display information such as chat in front.  
+To API Level 14 or later are supported  
 
 ##Screenshots
 ![](./screenshot/ss01.png)　
@@ -8,7 +8,7 @@ To API Level 14 or later are supported
 ![](./screenshot/ss03.png)
   
   
-*Watch YouTube video*
+*Watch YouTube video*  
 [SimpleFloating](http://youtu.be/nb8M2p0agF4)  
 [FloatingAd](http://youtu.be/PmvbQzxSBU0)
 
