@@ -1,6 +1,6 @@
 # FloatingView
-このAndroidプロジェクトは、チャットや何らかの情報を前面に表示するためのViewです  
-AndroidのAPI 14以降に対応しています  
+The Android project is View to display information such as chat in front
+To API Level 14 or later are supported
 
 ##Screenshots
 ![](./screenshot/ss01.png)　
@@ -8,7 +8,7 @@ AndroidのAPI 14以降に対応しています
 ![](./screenshot/ss03.png)
   
   
-動作の詳細はYouTubeの動画を確認してください  
+*Watch YouTube video*
 [SimpleFloating](http://youtu.be/nb8M2p0agF4)  
 [FloatingAd](http://youtu.be/PmvbQzxSBU0)
 
@@ -17,23 +17,34 @@ Target Sdk Version : 22
 Min Sdk Version : 14  
 
 ##How to use
-1) FloatingViewを使用したいプロジェクトに本プロジェクトのlibraryを追加します  
+1) Add this to your **build.gradle**.
+  ```java
+  repositories {
+      maven {
+          url "https://jitpack.io"
+      }
+  }
+
+  dependencies {
+    compile 'com.github.recruit-lifestyle:FloatingView:1.0'
+  }
+  ```
   
-2) FloatingViewを表示するためのServiceを定義します 
+2) Implement Service for displaying FloatingView
 ```java
 public class ChatHeadService extends Service {
   ・・・
 }
 ```
   
-3) FloatingViewに表示するViewの設定を行います（サンプルではonStartCommandで行っています）  
+3) You will do the setting of the View to be displayed in the FloatingView（Sample have a set in onStartCommand）
 ```java
   final LayoutInflater inflater = LayoutInflater.from(this);
   final ImageView iconView = (ImageView) inflater.inflate(R.layout.widget_chathead, null, false);
   iconView.setOnClickListener(・・・);
 ```  
 
-4) FloatingViewManagerを使用して、FloatingViewの設定を行います 
+4) Use the FloatingViewManager, make the setting of FloatingView
 ```java
   mFloatingViewManager = new FloatingViewManager(this, this);
   mFloatingViewManager.setFixedTrashIconImage(R.drawable.ic_trash_fixed);
@@ -41,9 +52,9 @@ public class ChatHeadService extends Service {
   mFloatingViewManager.addViewToWindow(iconView, FloatingViewManager.SHAPE_CIRCLE, (int) (16 * metrics.density));
 ```  
 
-なお、FloatingViewManagerの第２引数はFloatingViewListenerです  
+The second argument of FloatingViewManager is FloatingViewListener
   
-これは、FloatingViewを終了する際に呼び出される処理(onFinishFloatingView)を記述します  
+Describe the process (onFinishFloatingView) that is called when you exit the FloatingView
 ```java
     @Override
     public void onFinishFloatingView() {
@@ -51,18 +62,18 @@ public class ChatHeadService extends Service {
     }
 ```
   
-5) AndroidManifestにパーミッションを追加します
+5) Add the permission to AndroidManifest
 ```xml
  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
  <uses-permission android:name="android.permission.VIBRATE"/>
 ```  
   
-6) AndroidManifestにServiceを定義します  
-例)
+6) Define the Service to AndroidManifest
+example)
 ```java
     <application ・・・>
         ・・・
-        <!-- デモ表示サービス -->
+        <!-- Demo -->
         <service
             android:name="jp.co.recruit_lifestyle.sample.service.ChatHeadService"
             android:exported="false"/>
@@ -70,7 +81,7 @@ public class ChatHeadService extends Service {
     </application>
 ```
   
-7) Serviceを開始する処理を記述します(以下はFragmentの例)
+7) Describe the process to start the Service (example of Fragment)
 ```java
     final Activity activity = getActivity();
     activity.startService(new Intent(activity, ChatHeadService.class));
