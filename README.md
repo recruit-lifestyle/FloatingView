@@ -3,10 +3,10 @@ The Android project is View to display information such as chat in front.
 To API Level 14 or later are supported  
 
 ##Screenshots
-![](./sc/animation.gif)  
-<img src="./sc/ss01.png" width="200">
-<img src="./sc/ss02.png" width="200">
-<img src="./sc/ss03.png" width="200">
+![](./screenshot/animation.gif)  
+<img src="./screenshot/ss01.png" width="200">
+<img src="./screenshot/ss02.png" width="200">
+<img src="./screenshot/ss03.png" width="200">
   
 *Watch YouTube video*  
 [SimpleFloating](http://youtu.be/nb8M2p0agF4)  
