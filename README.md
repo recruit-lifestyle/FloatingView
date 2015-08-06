@@ -87,11 +87,12 @@ example)
     activity.startService(new Intent(activity, ChatHeadService.class));
 ```
   
-補足)FloatingAdServiceを動作させるためには、string.xmlのad_unit_idを自身の広告ID(インタースティシャル)で置き換えてください  
+Info.
+If you want to use the FloatingAdService,replace the ad_unit_id(string.xml) with your ad unit id (Interstitial Ad).
 ```xml
  <string name="ad_unit_id">ADD_YOUR_UNIT_ID</string>
 ```  
-参考：[アプリに広告ユニット IDを設定する](https://developers.google.com/mobile-ads-sdk/docs/admob/android/quick-start?hl=ja#give_your_app_an_ad_unit_id)  
+Reference：[Give your app an Ad Unit ID](https://developers.google.com/admob/android/quick-start?hl=en#give_your_app_an_ad_unit_id)  
 
 ## Credits
 
