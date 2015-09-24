@@ -360,7 +360,6 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         // FloatingView
         final FloatingView floatingView = new FloatingView(mContext);
         floatingView.addView(view);
-        view.setClickable(false);
         floatingView.setOnTouchListener(this);
         floatingView.setShape(shape);
         floatingView.setOverMargin(overMargin);

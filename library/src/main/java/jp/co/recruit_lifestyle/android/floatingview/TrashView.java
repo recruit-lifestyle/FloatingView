@@ -87,7 +87,7 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
     /**
      * 長押し判定とする時間
      */
-    private static final int LONGPRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
+    private static final int LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
 
     /**
      * WindowManager
@@ -506,7 +506,7 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
             mAnimationHandler.updateTargetPosition(x, y);
             // 長押し処理待ち
             mAnimationHandler.removeMessages(ANIMATION_CLOSE);
-            mAnimationHandler.sendAnimationMessageDelayed(ANIMATION_OPEN, LONGPRESS_TIMEOUT);
+            mAnimationHandler.sendAnimationMessageDelayed(ANIMATION_OPEN, LONG_PRESS_TIMEOUT);
         }
         // 移動
         else if (action == MotionEvent.ACTION_MOVE) {

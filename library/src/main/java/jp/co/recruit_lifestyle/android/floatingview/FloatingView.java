@@ -33,6 +33,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -93,6 +94,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * 終了状態
      */
     static final int STATE_FINISHING = 2;
+
+    /**
+     * 長押し判定とする時間(移動操作も考慮して通常の1.5倍)
+     */
+    private static final int LONG_PRESS_TIMEOUT = (int) (1.5f * ViewConfiguration.getLongPressTimeout());
 
     /**
      * WindowManager
@@ -185,6 +191,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private final FloatingAnimationHandler mAnimationHandler;
 
     /**
+     * 長押しを判定するためのハンドラ
+     */
+    private final LongPressHandler mLongPressHandler;
+
+    /**
      * 画面端をオーバーするマージン
      */
     private int mOverMargin;
@@ -198,6 +209,16 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * 画面上の右側にある場合はtrue
      */
     private boolean mIsOnRight;
+
+    /**
+     * OnTouchListener
+     */
+    private OnTouchListener mOnTouchListener;
+
+    /**
+     * 長押し状態の場合
+     */
+    private boolean mIsLongPressed;
 
     /**
      * コンストラクタ
@@ -220,6 +241,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         // 左下の座標を0とする
         mParams.gravity = Gravity.LEFT | Gravity.BOTTOM;
         mAnimationHandler = new FloatingAnimationHandler(this);
+        mLongPressHandler = new LongPressHandler(this);
         mMoveEdgeInterpolator = new OvershootInterpolator(MOVE_TO_EDGE_OVERSHOOT_TENSION);
 
         mMoveLimitRect = new Rect();
@@ -357,6 +379,9 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             mAnimationHandler.updateTouchPosition(getXByTouch(), getYByTouch());
             mAnimationHandler.removeMessages(FloatingAnimationHandler.ANIMATION_IN_TOUCH);
             mAnimationHandler.sendAnimationMessage(FloatingAnimationHandler.ANIMATION_IN_TOUCH);
+            // 長押し判定の開始
+            mLongPressHandler.removeMessages(LongPressHandler.LONG_PRESSED);
+            mLongPressHandler.sendEmptyMessageDelayed(LongPressHandler.LONG_PRESSED, LONG_PRESS_TIMEOUT);
             // 速度の取得準備
             if (mVelocityTracker == null) {
                 mVelocityTracker = VelocityTracker.obtain();
@@ -370,6 +395,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         }
         // 移動
         else if (action == MotionEvent.ACTION_MOVE) {
+            // 移動判定の場合は長押しの解除
+            if (mIsMoveAccept) {
+                mIsLongPressed = false;
+                mLongPressHandler.removeMessages(LongPressHandler.LONG_PRESSED);
+            }
             // 押下処理が行われていない場合は処理しない
             if (mTouchDownTime != event.getDownTime()) {
                 return true;
@@ -388,6 +418,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         }
         // 押上、キャンセル
         else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+            // 判定のため長押しの状態を一時的に保持
+            final boolean tmpIsLongPressed = mIsLongPressed;
+            // 長押しの解除
+            mIsLongPressed = false;
+            mLongPressHandler.removeMessages(LongPressHandler.LONG_PRESSED);
             // 押下処理が行われていない場合は処理しない
             if (mTouchDownTime != event.getDownTime()) {
                 return true;
@@ -407,11 +442,10 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             }
             // 動かされていなければ、クリックイベントを発行
             else {
-                // 一番上のViewからたどって、1つ処理したら終了
-                final int size = getChildCount();
-                for (int i = size - 1; i >= 0; i--) {
-                    if (getChildAt(i).performClick()) {
-                        break;
+                if (!tmpIsLongPressed) {
+                    final int size = getChildCount();
+                    for (int i = 0; i < size; i++) {
+                        getChildAt(i).performClick();
                     }
                 }
             }
@@ -426,7 +460,24 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
 
         }
 
-        return super.dispatchTouchEvent(event);
+        // タッチリスナを通知
+        if (mOnTouchListener != null) {
+            mOnTouchListener.onTouch(this, event);
+        }
+
+        return true;
+    }
+
+    /**
+     * 長押しされた場合の処理です。
+     */
+    private void onLongClick() {
+        mIsLongPressed = true;
+        // 長押し処理
+        final int size = getChildCount();
+        for (int i = 0; i < size; i++) {
+            getChildAt(i).performLongClick();
+        }
     }
 
     /**
@@ -443,8 +494,17 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
                 moveToEdge(false);
             }
             mAnimationHandler.removeMessages(FloatingAnimationHandler.ANIMATION_IN_TOUCH);
+            mLongPressHandler.removeMessages(LongPressHandler.LONG_PRESSED);
         }
         super.setVisibility(visibility);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setOnTouchListener(OnTouchListener listener) {
+        mOnTouchListener = listener;
     }
 
     /**
@@ -929,6 +989,43 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
          */
         int getState() {
             return mState;
+        }
+    }
+
+    /**
+     * 長押し処理を制御するハンドラです。<br/>
+     * dispatchTouchEventで全てのタッチ処理を実装しているので、長押しも独自実装しています。
+     */
+    static class LongPressHandler extends Handler {
+
+        /**
+         * TrashView
+         */
+        private WeakReference<FloatingView> mFloatingView;
+
+        /**
+         * アニメーションなしの状態を表す定数
+         */
+        private static final int LONG_PRESSED = 0;
+
+        /**
+         * コンストラクタ
+         *
+         * @param view FloatingView
+         */
+        LongPressHandler(FloatingView view) {
+            mFloatingView = new WeakReference<>(view);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            FloatingView view = mFloatingView.get();
+            if (view == null) {
+                removeMessages(LONG_PRESSED);
+                return;
+            }
+
+            view.onLongClick();
         }
     }
 }
