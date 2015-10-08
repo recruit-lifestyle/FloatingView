@@ -350,19 +350,34 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
 
     /**
      * ViewをWindowに貼り付けます。
+     * This method was deprecated in 1.2. Use #addViewToWindow(View, Options)
      *
      * @param view       フローティングさせるView
      * @param shape      フローティングさせるViewの矩形（SHAPE_RECTANGLE or SHAPE_CIRCLE）
      * @param overMargin マージン
      */
+    @Deprecated
     public void addViewToWindow(View view, float shape, int overMargin) {
+        final Options options = new Options();
+        options.shape = shape;
+        options.overMargin = overMargin;
+        addViewToWindow(view, options);
+    }
+
+    /**
+     * ViewをWindowに貼り付けます。
+     *
+     * @param view    フローティングさせるView
+     * @param options Options
+     */
+    public void addViewToWindow(View view, Options options) {
         final boolean isFirstAttach = mFloatingViewList.isEmpty();
         // FloatingView
         final FloatingView floatingView = new FloatingView(mContext);
-        floatingView.addView(view);
+        floatingView.setInitCoords(options.floatingViewX, options.floatingViewY);
         floatingView.setOnTouchListener(this);
-        floatingView.setShape(shape);
-        floatingView.setOverMargin(overMargin);
+        floatingView.setShape(options.shape);
+        floatingView.setOverMargin(options.overMargin);
         floatingView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
@@ -371,6 +386,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
                 return false;
             }
         });
+        floatingView.addView(view);
         // 非表示モードの場合
         if (mDisplayMode == DISPLAY_MODE_HIDE_ALWAYS) {
             floatingView.setVisibility(View.GONE);
@@ -427,6 +443,43 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             mWindowManager.removeViewImmediate(floatingView);
         }
         mFloatingViewList.clear();
+    }
+
+    /**
+     * FloatingViewを貼り付ける際のオプションを表すクラスです。
+     */
+    public static class Options {
+
+        /**
+         * フローティングさせるViewの矩形（SHAPE_RECTANGLE or SHAPE_CIRCLE）
+         */
+        public float shape;
+
+        /**
+         * 画面外のはみ出しマージン
+         */
+        public int overMargin;
+
+        /**
+         * 画面左下を原点とするFloatingViewのX座標
+         */
+        public int floatingViewX;
+
+        /**
+         * 画面左下を原点とするFloatingViewのY座標
+         */
+        public int floatingViewY;
+
+        /**
+         * オプションのデフォルト値を設定します。
+         */
+        public Options() {
+            shape = SHAPE_CIRCLE;
+            overMargin = 0;
+            floatingViewX = FloatingView.DEFAULT_X;
+            floatingViewY = FloatingView.DEFAULT_Y;
+        }
+
     }
 
 }

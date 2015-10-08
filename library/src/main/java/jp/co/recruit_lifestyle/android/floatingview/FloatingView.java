@@ -31,7 +31,6 @@ import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -75,12 +74,6 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private static final float MOVE_TO_EDGE_OVERSHOOT_TENSION = 1.25f;
 
     /**
-     * FloatingViewの位置決めに利用します。<br/>
-     * 指定時間後に左半分にいるか、右半分にいるかを判定するために利用します。
-     */
-    private static final float SIDE_CHANGE_THRESHOLD_MILLIS = 0.75f;
-
-    /**
      * 通常状態
      */
     static final int STATE_NORMAL = 0;
@@ -99,6 +92,16 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * 長押し判定とする時間(移動操作も考慮して通常の1.5倍)
      */
     private static final int LONG_PRESS_TIMEOUT = (int) (1.5f * ViewConfiguration.getLongPressTimeout());
+
+    /**
+     * デフォルトのX座標を表す値
+     */
+    static final int DEFAULT_X = Integer.MIN_VALUE;
+
+    /**
+     * デフォルトのY座標を表す値
+     */
+    static final int DEFAULT_Y = Integer.MIN_VALUE;
 
     /**
      * WindowManager
@@ -149,6 +152,14 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * ローカルのタッチY座標
      */
     private float mLocalTouchY;
+    /**
+     * 初期表示のX座標
+     */
+    private int mInitX;
+    /**
+     * 初期表示のY座標
+     */
+    private int mInitY;
 
     /**
      * ステータスバーの高さ
@@ -201,16 +212,6 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private int mOverMargin;
 
     /**
-     * VelocityTracker
-     */
-    private VelocityTracker mVelocityTracker;
-
-    /**
-     * 画面上の右側にある場合はtrue
-     */
-    private boolean mIsOnRight;
-
-    /**
      * OnTouchListener
      */
     private OnTouchListener mOnTouchListener;
@@ -219,6 +220,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * 長押し状態の場合
      */
     private boolean mIsLongPressed;
+
+    /**
+     * 画面端に自動で移動するフラグ
+     */
+    private boolean mIsMoveEdge;
 
     /**
      * コンストラクタ
@@ -243,6 +249,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         mAnimationHandler = new FloatingAnimationHandler(this);
         mLongPressHandler = new LongPressHandler(this);
         mMoveEdgeInterpolator = new OvershootInterpolator(MOVE_TO_EDGE_OVERSHOOT_TENSION);
+        mIsMoveEdge = true;
 
         mMoveLimitRect = new Rect();
         mPositionLimitRect = new Rect();
@@ -284,12 +291,17 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     @Override
     public boolean onPreDraw() {
         getViewTreeObserver().removeOnPreDrawListener(this);
-        mParams.x = 0;
-        mParams.y = mMetrics.heightPixels - mStatusBarHeight - getMeasuredHeight();
-        mWindowManager.updateViewLayout(this, mParams);
+        if (mIsMoveEdge) {
+            mParams.x = 0;
+            mParams.y = mMetrics.heightPixels - mStatusBarHeight - getMeasuredHeight();
+            moveToEdge(false);
+        } else {
+            mParams.x = mInitX;
+            mParams.y = mInitY;
+            moveTo(mInitX, mInitY, mInitX, mInitY, false);
+        }
         mIsDraggable = true;
-        mIsOnRight = false;
-        moveToEdge(false);
+        mWindowManager.updateViewLayout(this, mParams);
         return true;
     }
 
@@ -302,6 +314,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         // 前の画面座標を保存
         final int oldScreenHeight = mMetrics.heightPixels;
         final int oldScreenWidth = mMetrics.widthPixels;
+        final int oldPositionLimitWidth = mPositionLimitRect.width();
         final int oldPositionLimitHeight = mPositionLimitRect.height();
 
         // 新しい座標情報に切替
@@ -317,14 +330,21 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
 
         // 縦横切替の場合
         if (oldScreenWidth != newScreenWidth || oldScreenHeight != newScreenHeight) {
-            // 現在の位置からX座標を設定
-            // 右半分にある場合
-            if (mParams.x > (newScreenWidth - width) / 2) {
-                mParams.x = mPositionLimitRect.right;
+            // 画面端に移動する場合は現在の位置から左右端を設定
+            if (mIsMoveEdge) {
+                // 右半分にある場合
+                if (mParams.x > (newScreenWidth - width) / 2) {
+                    mParams.x = mPositionLimitRect.right;
+                }
+                // 左半分にある場合
+                else {
+                    mParams.x = mPositionLimitRect.left;
+                }
             }
-            // 左半分にある場合
+            // 画面端に移動しない場合は画面座標の比率から計算
             else {
-                mParams.x = mPositionLimitRect.left;
+                final int newX = (int) (mParams.x * mPositionLimitRect.width() / (float) oldPositionLimitWidth + 0.5f);
+                mParams.x = Math.min(Math.max(mPositionLimitRect.left, newX), mPositionLimitRect.right);
             }
 
             // スクリーン位置の比率からY座標を設定(四捨五入)
@@ -382,13 +402,6 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             // 長押し判定の開始
             mLongPressHandler.removeMessages(LongPressHandler.LONG_PRESSED);
             mLongPressHandler.sendEmptyMessageDelayed(LongPressHandler.LONG_PRESSED, LONG_PRESS_TIMEOUT);
-            // 速度の取得準備
-            if (mVelocityTracker == null) {
-                mVelocityTracker = VelocityTracker.obtain();
-            } else {
-                mVelocityTracker.clear();
-            }
-            mVelocityTracker.addMovement(event);
             // 押下処理の通過判定のための時間保持
             // mIsDraggableやgetVisibility()のフラグが押下後に変更された場合にMOVE等を処理させないようにするため
             mTouchDownTime = event.getDownTime();
@@ -411,10 +424,6 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             }
             mIsMoveAccept = true;
             mAnimationHandler.updateTouchPosition(getXByTouch(), getYByTouch());
-
-            // 速度計算
-            mVelocityTracker.addMovement(event);
-            mVelocityTracker.computeCurrentVelocity(1000);
         }
         // 押上、キャンセル
         else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
@@ -434,10 +443,6 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
 
             // 動かされていれば画面端に戻す
             if (mIsMoveAccept) {
-                // 速度計算
-                mVelocityTracker.addMovement(event);
-                mVelocityTracker.computeCurrentVelocity(1000);
-                //moveToEdge(mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
                 moveToEdge(true);
             }
             // 動かされていなければ、クリックイベントを発行
@@ -449,15 +454,6 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
                     }
                 }
             }
-
-
-            mVelocityTracker.recycle();
-            // nullを入れないと落ちる場合に対処(4.3以下の端末で確認)
-            // http://stackoverflow.com/questions/26074907/velocitytracker-causes-crash-on-android-4-4
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                mVelocityTracker = null;
-            }
-
         }
 
         // タッチリスナを通知
@@ -508,57 +504,6 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     }
 
     /**
-     * 画面内の定位置に移動します。
-     *
-     * @param velocityX 　X軸の加速度
-     * @param velocityY Y軸の加速度
-     */
-    private void moveToEdge(float velocityX, float velocityY) {
-        final int currentX = getXByTouch();
-        final int centerOfScreen = (mMetrics.widthPixels - getWidth()) / 2;
-        final int futureX = (int) (velocityX * SIDE_CHANGE_THRESHOLD_MILLIS);
-
-        // TODO:フリックのやり方によってはうまく動作しない場合があるので検討
-        // デフォルト位置をセット
-        boolean isMoveRightEdge = mIsOnRight;
-        // 右側にある場合
-        if (isMoveRightEdge) {
-            // 現在位置が左半分、もしくは速度計算すれば左半分に到達する場合
-            if (currentX < centerOfScreen || currentX + futureX < centerOfScreen) {
-                isMoveRightEdge = false;
-            }
-        }
-        // 左側にある場合
-        else {
-            // 現在位置が右半分、もしくは速度計算すれば右半分に到達する場合
-            if (currentX > centerOfScreen || currentX + futureX > centerOfScreen) {
-                isMoveRightEdge = true;
-            }
-        }
-        final int goalPositionX = isMoveRightEdge ? mPositionLimitRect.right : mPositionLimitRect.left;
-        mIsOnRight = isMoveRightEdge;
-        mMoveEdgeAnimator = ValueAnimator.ofInt(currentX, goalPositionX);
-        mMoveEdgeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                mParams.x = (Integer) animation.getAnimatedValue();
-                mWindowManager.updateViewLayout(FloatingView.this, mParams);
-            }
-        });
-        // X軸のアニメーション設定
-        mMoveEdgeAnimator.setDuration(MOVE_TO_EDGE_DURATION);
-        // TODO:暫定の実装
-        mMoveEdgeAnimator.setInterpolator(new OvershootInterpolator(Math.min(Math.max(Math.abs(velocityX) / 3000 * 2.0f, MOVE_TO_EDGE_OVERSHOOT_TENSION), 4.0f)));
-        mMoveEdgeAnimator.start();
-        // タッチ座標を初期化
-        mLocalTouchX = 0;
-        mLocalTouchY = 0;
-        mScreenTouchDownX = 0;
-        mScreenTouchDownY = 0;
-        mIsMoveAccept = false;
-    }
-
-    /**
      * 左右の端に移動します。
      *
      * @param withAnimation アニメーションを行う場合はtrue.行わない場合はfalse
@@ -568,11 +513,36 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         // X・Y座標と移動方向を設定
         final int currentX = getXByTouch();
         final int currentY = getYByTouch();
-        final boolean isMoveRightEdge = currentX > (mMetrics.widthPixels - getWidth()) / 2;
-        final int goalPositionX = isMoveRightEdge ? mPositionLimitRect.right : mPositionLimitRect.left;
-        final int goalPositionY = Math.min(Math.max(mPositionLimitRect.top, currentY), mPositionLimitRect.bottom);
-        mIsOnRight = isMoveRightEdge;
+        final int goalPositionX;
+        // 画面端に移動する場合は画面端の座標を設定
+        if (mIsMoveEdge) {
+            final boolean isMoveRightEdge = currentX > (mMetrics.widthPixels - getWidth()) / 2;
+            goalPositionX = isMoveRightEdge ? mPositionLimitRect.right : mPositionLimitRect.left;
+        }
+        // 画面端に移動しない場合は、現在の座標のまま
+        else {
+            goalPositionX = currentX;
+        }
+        // TODO:Y座標もアニメーションさせる
+        final int goalPositionY = currentY;
+        // 指定座標に移動
+        moveTo(currentX, currentY, goalPositionX, goalPositionY, withAnimation);
+    }
 
+    /**
+     * 指定座標に移動します。<br/>
+     * 画面端の座標を超える場合は、自動的に画面端に移動します。
+     *
+     * @param currentX      現在のX座標（アニメーションの始点用に使用）
+     * @param currentY      現在のY座標（アニメーションの始点用に使用）
+     * @param goalPositionX 移動先のX座標
+     * @param goalPositionY 移動先のY座標
+     * @param withAnimation アニメーションを行う場合はtrue.行わない場合はfalse
+     */
+    private void moveTo(int currentX, int currentY, int goalPositionX, int goalPositionY, boolean withAnimation) {
+        // 画面端からはみ出さないように調整
+        goalPositionX = Math.min(Math.max(mPositionLimitRect.left, goalPositionX), mPositionLimitRect.right);
+        goalPositionY = Math.min(Math.max(mPositionLimitRect.top, goalPositionY), mPositionLimitRect.bottom);
         // アニメーションを行う場合
         if (withAnimation) {
             // TODO:Y座標もアニメーションさせる
@@ -670,6 +640,19 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      */
     void setOverMargin(int margin) {
         mOverMargin = margin;
+    }
+
+    /**
+     * 初期座標を設定します。
+     *
+     * @param x FloatingViewの初期X座標
+     * @param y FloatingViewの初期Y座標
+     */
+    void setInitCoords(int x, int y) {
+        mInitX = x;
+        mInitY = y;
+        // デフォルトから変更されていたら画面端に移動しない
+        mIsMoveEdge = mInitX == DEFAULT_X && mInitY == DEFAULT_Y;
     }
 
     /**

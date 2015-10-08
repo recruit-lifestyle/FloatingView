@@ -91,7 +91,13 @@ public class FloatingAdService extends Service implements FloatingViewListener {
         mFloatingViewManager = new FloatingViewManager(this, this);
         mFloatingViewManager.setFixedTrashIconImage(R.drawable.ic_trash_fixed);
         mFloatingViewManager.setActionTrashIconImage(R.drawable.ic_trash_action);
-        mFloatingViewManager.addViewToWindow(iconView, FloatingViewManager.SHAPE_CIRCLE, (int) (16 * metrics.density));
+        final FloatingViewManager.Options options = new FloatingViewManager.Options();
+        options.shape = FloatingViewManager.SHAPE_CIRCLE;
+        options.overMargin = (int) (16 * metrics.density);
+        // Origin left-bottom
+        options.floatingViewX = metrics.widthPixels / 2;
+        options.floatingViewY = metrics.heightPixels / 2;
+        mFloatingViewManager.addViewToWindow(iconView, options);
 
         // 常駐起動
         startForeground(NOTIFICATION_ID, createNotification());
