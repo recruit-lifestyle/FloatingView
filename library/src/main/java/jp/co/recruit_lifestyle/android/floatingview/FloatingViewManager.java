@@ -50,6 +50,23 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
     public static final int DISPLAY_MODE_HIDE_FULLSCREEN = 3;
 
     /**
+     * 左右の近い方向に移動
+     */
+    public static final int MOVE_DIRECTION_DEFAULT = 0;
+    /**
+     * 常に左に移動
+     */
+    public static final int MOVE_DIRECTION_LEFT = 1;
+    /**
+     * 常に右に移動
+     */
+    public static final int MOVE_DIRECTION_RIGHT = 2;
+    /**
+     * 移動しない
+     */
+    public static final int MOVE_DIRECTION_NONE = 3;
+
+    /**
      * FloatingViewと削除ボタンが重なった時のバイブレーション時間(ミリ秒)
      */
     private static final long VIBRATE_INTERSECTS_MILLIS = 15;
@@ -378,6 +395,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         floatingView.setOnTouchListener(this);
         floatingView.setShape(options.shape);
         floatingView.setOverMargin(options.overMargin);
+        floatingView.setMoveDirection(options.moveDirection);
         floatingView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
@@ -471,6 +489,12 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         public int floatingViewY;
 
         /**
+         * FloatingViewが吸着する方向
+         * ※座標を指定すると自動的にMOVE_DIRECTION_NONEになります
+         */
+        public int moveDirection;
+
+        /**
          * オプションのデフォルト値を設定します。
          */
         public Options() {
@@ -478,6 +502,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             overMargin = 0;
             floatingViewX = FloatingView.DEFAULT_X;
             floatingViewY = FloatingView.DEFAULT_Y;
+            moveDirection = MOVE_DIRECTION_DEFAULT;
         }
 
     }

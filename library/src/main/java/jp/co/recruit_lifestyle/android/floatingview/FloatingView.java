@@ -222,9 +222,9 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private boolean mIsLongPressed;
 
     /**
-     * 画面端に自動で移動するフラグ
+     * 移動方向
      */
-    private boolean mIsMoveEdge;
+    private int mMoveDirection;
 
     /**
      * コンストラクタ
@@ -249,7 +249,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         mAnimationHandler = new FloatingAnimationHandler(this);
         mLongPressHandler = new LongPressHandler(this);
         mMoveEdgeInterpolator = new OvershootInterpolator(MOVE_TO_EDGE_OVERSHOOT_TENSION);
-        mIsMoveEdge = true;
+        mMoveDirection = FloatingViewManager.MOVE_DIRECTION_DEFAULT;
 
         mMoveLimitRect = new Rect();
         mPositionLimitRect = new Rect();
@@ -291,14 +291,15 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     @Override
     public boolean onPreDraw() {
         getViewTreeObserver().removeOnPreDrawListener(this);
-        if (mIsMoveEdge) {
-            mParams.x = 0;
-            mParams.y = mMetrics.heightPixels - mStatusBarHeight - getMeasuredHeight();
-            moveToEdge(false);
-        } else {
+        // 画面端に移動しない場合は指定座標に移動
+        if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_NONE) {
             mParams.x = mInitX;
             mParams.y = mInitY;
             moveTo(mInitX, mInitY, mInitX, mInitY, false);
+        } else {
+            mParams.x = 0;
+            mParams.y = mMetrics.heightPixels - mStatusBarHeight - getMeasuredHeight();
+            moveToEdge(false);
         }
         mIsDraggable = true;
         mWindowManager.updateViewLayout(this, mParams);
@@ -331,7 +332,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         // 縦横切替の場合
         if (oldScreenWidth != newScreenWidth || oldScreenHeight != newScreenHeight) {
             // 画面端に移動する場合は現在の位置から左右端を設定
-            if (mIsMoveEdge) {
+            if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_DEFAULT) {
                 // 右半分にある場合
                 if (mParams.x > (newScreenWidth - width) / 2) {
                     mParams.x = mPositionLimitRect.right;
@@ -340,6 +341,14 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
                 else {
                     mParams.x = mPositionLimitRect.left;
                 }
+            }
+            // 左端に移動
+            else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_LEFT) {
+                mParams.x = mPositionLimitRect.left;
+            }
+            // 右端に移動
+            else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_RIGHT) {
+                mParams.x = mPositionLimitRect.right;
             }
             // 画面端に移動しない場合は画面座標の比率から計算
             else {
@@ -515,9 +524,17 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         final int currentY = getYByTouch();
         final int goalPositionX;
         // 画面端に移動する場合は画面端の座標を設定
-        if (mIsMoveEdge) {
+        if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_DEFAULT) {
             final boolean isMoveRightEdge = currentX > (mMetrics.widthPixels - getWidth()) / 2;
             goalPositionX = isMoveRightEdge ? mPositionLimitRect.right : mPositionLimitRect.left;
+        }
+        // 左端への移動
+        else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_LEFT) {
+            goalPositionX = mPositionLimitRect.left;
+        }
+        // 右端への移動
+        else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_RIGHT) {
+            goalPositionX = mPositionLimitRect.right;
         }
         // 画面端に移動しない場合は、現在の座標のまま
         else {
@@ -643,6 +660,20 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     }
 
     /**
+     * 移動方向を設定します。
+     *
+     * @param moveDirection 移動方向
+     */
+    void setMoveDirection(int moveDirection) {
+        // デフォルトから変更されていたら画面端に移動しない
+        if (mInitX != DEFAULT_X || mInitY != DEFAULT_Y) {
+            mMoveDirection = FloatingViewManager.MOVE_DIRECTION_NONE;
+        } else {
+            mMoveDirection = moveDirection;
+        }
+    }
+
+    /**
      * 初期座標を設定します。
      *
      * @param x FloatingViewの初期X座標
@@ -651,8 +682,6 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     void setInitCoords(int x, int y) {
         mInitX = x;
         mInitY = y;
-        // デフォルトから変更されていたら画面端に移動しない
-        mIsMoveEdge = mInitX == DEFAULT_X && mInitY == DEFAULT_Y;
     }
 
     /**
@@ -721,7 +750,6 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     int getState() {
         return mAnimationHandler.getState();
     }
-
 
     /**
      * アニメーションの制御を行うハンドラです。

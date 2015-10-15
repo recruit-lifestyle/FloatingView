@@ -95,8 +95,10 @@ public class FloatingAdService extends Service implements FloatingViewListener {
         options.shape = FloatingViewManager.SHAPE_CIRCLE;
         options.overMargin = (int) (16 * metrics.density);
         // Origin left-bottom
-        options.floatingViewX = metrics.widthPixels / 2;
-        options.floatingViewY = metrics.heightPixels / 2;
+        //options.floatingViewX = metrics.widthPixels / 2;
+        //options.floatingViewY = metrics.heightPixels / 2;
+        // Move right(force)
+        options.moveDirection = FloatingViewManager.MOVE_DIRECTION_RIGHT;
         mFloatingViewManager.addViewToWindow(iconView, options);
 
         // 常駐起動
