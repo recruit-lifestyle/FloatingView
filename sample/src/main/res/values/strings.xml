@@ -11,4 +11,5 @@
     <string name="show_demo">デモ表示</string>
     <string name="show_ad">広告表示</string>
     <string name="ad_unit_id">ADD_YOUR_UNIT_ID</string>
+    <string name="permission_denied">オーバレイの許可が出ませんでした</string>
 </resources>
