@@ -13,7 +13,7 @@ To API Level 14 or later are supported
 [FloatingAd](http://youtu.be/PmvbQzxSBU0)
 
 ## Requirements
-Target Sdk Version : 22  
+Target Sdk Version : 23  
 Min Sdk Version : 14  
 
 ##How to use
@@ -26,7 +26,7 @@ Min Sdk Version : 14
   }
 
   dependencies {
-    compile 'com.github.recruit-lifestyle:FloatingView:1.3'
+    compile 'com.github.recruit-lifestyle:FloatingView:1.4'
   }
   ```
   
