@@ -44,6 +44,11 @@ public class ChatHeadService extends Service implements FloatingViewListener {
     private FloatingViewManager mFloatingViewManager;
 
     /**
+     * Toast after clicked
+     */
+    private static Toast mToast;
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -62,7 +67,11 @@ public class ChatHeadService extends Service implements FloatingViewListener {
         iconView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(ChatHeadService.this, R.string.charhead_click_message, Toast.LENGTH_SHORT).show();
+                if(mToast != null) {
+                    mToast.cancel();
+                }
+                mToast = Toast.makeText(ChatHeadService.this, R.string.charhead_click_message, Toast.LENGTH_SHORT);
+                mToast.show();
             }
         });
 
