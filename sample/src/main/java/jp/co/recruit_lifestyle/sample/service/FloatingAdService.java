@@ -7,11 +7,11 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
@@ -25,6 +25,11 @@ import jp.co.recruit_lifestyle.android.floatingview.FloatingViewManager;
  * 広告を表示するサービスです。
  */
 public class FloatingAdService extends Service implements FloatingViewListener {
+
+    /**
+     * デバッグログ用のタグ
+     */
+    private static final String TAG = "FloatingAdService";
 
     /**
      * 通知ID
@@ -83,7 +88,7 @@ public class FloatingAdService extends Service implements FloatingViewListener {
                 if (mInterstitialAd.isLoaded()) {
                     mInterstitialAd.show();
                 } else {
-                    Toast.makeText(FloatingAdService.this, R.string.error_load_ad, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, getString(R.string.error_load_ad));
                 }
             }
         });

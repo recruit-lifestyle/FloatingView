@@ -10,10 +10,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import jp.co.recruit.floatingview.R;
 import jp.co.recruit_lifestyle.sample.service.ChatHeadService;
@@ -24,6 +24,11 @@ import jp.co.recruit_lifestyle.sample.service.FloatingAdService;
  * 設定画面のフラグメントです。
  */
 public class FloatingViewControlFragment extends Fragment {
+
+    /**
+     * デバッグログ用のタグ
+     */
+    private static final String TAG = "FloatingViewControl";
 
     /**
      * CountDownTimer
@@ -109,7 +114,7 @@ public class FloatingViewControlFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 mTimer.start();
-                Toast.makeText(getActivity(), R.string.ad_click_message, Toast.LENGTH_SHORT).show();
+                Log.d(TAG, getString(R.string.ad_click_message));
             }
         });
         return rootView;
@@ -125,13 +130,13 @@ public class FloatingViewControlFragment extends Fragment {
             final Context context = getActivity();
             final boolean canShow = showChatHead(context);
             if (!canShow) {
-                Toast.makeText(context, R.string.permission_denied, Toast.LENGTH_LONG).show();
+                Log.w(TAG, getString(R.string.permission_denied));
             }
         } else if (requestCode == FLOATINGAD_OVERLAY_PERMISSION_REQUEST_CODE) {
             final Context context = getActivity();
             final boolean canShow = showFloatingAd(context);
             if (!canShow) {
-                Toast.makeText(context, R.string.permission_denied, Toast.LENGTH_LONG).show();
+                Log.w(TAG, getString(R.string.permission_denied));
             }
         }
     }

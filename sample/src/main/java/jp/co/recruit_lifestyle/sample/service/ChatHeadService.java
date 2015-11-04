@@ -9,11 +9,11 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 
@@ -27,6 +27,11 @@ import jp.co.recruit_lifestyle.android.floatingview.FloatingViewManager;
  * ChatHead Service
  */
 public class ChatHeadService extends Service implements FloatingViewListener {
+
+    /**
+     * デバッグログ用のタグ
+     */
+    private static final String TAG = "ChatHeadService";
 
     /**
      * 通知ID
@@ -62,7 +67,7 @@ public class ChatHeadService extends Service implements FloatingViewListener {
         iconView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(ChatHeadService.this, R.string.charhead_click_message, Toast.LENGTH_SHORT).show();
+                Log.d(TAG, getString(R.string.charhead_click_message));
             }
         });
 
