@@ -37,6 +37,11 @@ public class FloatingAdService extends Service implements FloatingViewListener {
     private FloatingViewManager mFloatingViewManager;
 
     /**
+     * Toast after clicked
+     */
+    private static Toast mToast;
+
+    /**
      * {@link InterstitialAd}
      */
     private InterstitialAd mInterstitialAd;
@@ -83,7 +88,11 @@ public class FloatingAdService extends Service implements FloatingViewListener {
                 if (mInterstitialAd.isLoaded()) {
                     mInterstitialAd.show();
                 } else {
-                    Toast.makeText(FloatingAdService.this, R.string.error_load_ad, Toast.LENGTH_SHORT).show();
+                    if(mToast != null) {
+                        mToast.cancel();
+                    }
+                    mToast = Toast.makeText(FloatingAdService.this, R.string.error_load_ad, Toast.LENGTH_SHORT);
+                    mToast.show();
                 }
             }
         });
