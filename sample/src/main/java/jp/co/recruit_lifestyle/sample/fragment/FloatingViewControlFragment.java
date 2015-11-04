@@ -183,8 +183,8 @@ public class FloatingViewControlFragment extends Fragment {
      */
     @SuppressLint("NewApi")
     private boolean showFloatingAd(Context context) {
-        // API23未満かチェック
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
+        // API22以下かチェック
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
             context.startService(new Intent(context, FloatingAdService.class));
             return true;
         }
