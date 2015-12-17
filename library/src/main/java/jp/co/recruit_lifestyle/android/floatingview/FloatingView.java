@@ -227,6 +227,12 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private int mMoveDirection;
 
     /**
+     * flat that move to edge.
+     * Default is enable.
+     */
+    private boolean enableMoveToEdge = true;
+
+    /**
      * コンストラクタ
      *
      * @param context {@link android.content.Context}
@@ -451,7 +457,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             setScale(SCALE_NORMAL);
 
             // 動かされていれば画面端に戻す
-            if (mIsMoveAccept) {
+            if (mIsMoveAccept && enableMoveToEdge) {
                 moveToEdge(true);
             }
             // 動かされていなければ、クリックイベントを発行
@@ -510,6 +516,15 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     @Override
     public void setOnTouchListener(OnTouchListener listener) {
         mOnTouchListener = listener;
+    }
+
+    /**
+     * enable move to edge or not
+     *
+     * @param enableMoveToEdge : flag that move to edge
+     */
+    public void setMoveToEdgeEnabled(boolean enableMoveToEdge) {
+        this.enableMoveToEdge = enableMoveToEdge;
     }
 
     /**

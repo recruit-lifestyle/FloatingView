@@ -137,11 +137,19 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      */
     private int mDisplayMode;
 
+
+    /**
+     * flat that move to edge.
+     * Default is enable.
+     */
+    private boolean enableMoveToEdge = true;
+
     /**
      * Windowに貼り付けられたFloatingViewのリスト
      * TODO:第2弾のFloatingViewの複数表示で意味を発揮する予定
      */
     private final ArrayList<FloatingView> mFloatingViewList;
+
 
     /**
      * コンストラクタ
@@ -366,6 +374,15 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
     }
 
     /**
+     * enable move to edge or not
+     *
+     * @param enableMoveToEdge : flag that move to edge
+     */
+    public void setMoveToEdgeEnabled(boolean enableMoveToEdge) {
+        this.enableMoveToEdge = enableMoveToEdge;
+    }
+
+    /**
      * ViewをWindowに貼り付けます。
      * This method was deprecated in 1.2. Use #addViewToWindow(View, Options)
      *
@@ -396,6 +413,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         floatingView.setShape(options.shape);
         floatingView.setOverMargin(options.overMargin);
         floatingView.setMoveDirection(options.moveDirection);
+        floatingView.setMoveToEdgeEnabled(enableMoveToEdge);
         floatingView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
