@@ -388,6 +388,19 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      * @param options Options
      */
     public void addViewToWindow(View view, Options options) {
+        addViewToWindow(view, options, true);
+    }
+
+    /**
+     *
+     * add View to windowMananger.
+     * It support whether show {#link mTrashView} or not.
+     *
+     * @param view
+     * @param options Options
+     * @param showTrashView flag that show or not.
+     */
+    public void addViewToWindow(View view, Options options, boolean showTrashView) {
         final boolean isFirstAttach = mFloatingViewList.isEmpty();
         // FloatingView
         final FloatingView floatingView = new FloatingView(mContext);
@@ -422,8 +435,11 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         } else {
             mWindowManager.removeViewImmediate(mTrashView);
         }
-        // 必ずトップに来て欲しいので毎回貼り付け
-        mWindowManager.addView(mTrashView, mTrashView.getWindowLayoutParams());
+
+        if (showTrashView) {
+            // 必ずトップに来て欲しいので毎回貼り付け
+            mWindowManager.addView(mTrashView, mTrashView.getWindowLayoutParams());
+        }
     }
 
     /**
