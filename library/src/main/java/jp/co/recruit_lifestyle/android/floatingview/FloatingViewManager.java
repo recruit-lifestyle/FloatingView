@@ -171,6 +171,10 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      * @return 削除Viewと重なっている場合はtrue
      */
     private boolean isIntersectWithTrash() {
+        // 無効の場合は重なり判定を行わない
+        if (!mTrashView.isTrashEnabled()) {
+            return false;
+        }
         // INFO:TrashViewとFloatingViewは同じGravityにする必要があります
         mTrashView.getWindowDrawingRect(mTrashViewRect);
         mTargetFloatingView.getWindowDrawingRect(mFloatingViewRect);
@@ -363,6 +367,24 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             }
             mTrashView.dismiss();
         }
+    }
+
+    /**
+     * TrashViewの表示・非表示を設定します。
+     *
+     * @param enabled trueの場合は表示
+     */
+    public void setTrashViewEnabled(boolean enabled) {
+        mTrashView.setTrashEnabled(enabled);
+    }
+
+    /**
+     * TrashViewの表示非表示状態を取得します。
+     *
+     * @return trueの場合は表示状態（重なり判定が有効の状態）
+     */
+    public boolean isTrashViewEnabled() {
+        return mTrashView.isTrashEnabled();
     }
 
     /**

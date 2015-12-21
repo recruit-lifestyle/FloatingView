@@ -165,6 +165,11 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
     private TrashViewListener mTrashViewListener;
 
     /**
+     * Viewの有効・無効フラグ（無効の場合は表示されない）
+     */
+    private boolean mIsEnabled;
+
+    /**
      * コンストラクタ
      *
      * @param context Context
@@ -175,6 +180,7 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
         mMetrics = new DisplayMetrics();
         mWindowManager.getDefaultDisplay().getMetrics(mMetrics);
         mAnimationHandler = new AnimationHandler(this);
+        mIsEnabled = true;
 
         mParams = new WindowManager.LayoutParams();
         mParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -460,6 +466,33 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
     }
 
     /**
+     * TrashViewの有効・無効を設定します。
+     *
+     * @param enabled trueの場合は有効（表示）、falseの場合は無効（非表示）
+     */
+    void setTrashEnabled(boolean enabled) {
+        // 設定が同じ場合は何もしない
+        if (mIsEnabled == enabled) {
+            return;
+        }
+
+        // 非表示にする場合は閉じる
+        mIsEnabled = enabled;
+        if (!mIsEnabled) {
+            dismiss();
+        }
+    }
+
+    /**
+     * TrashViewの表示状態を取得します。
+     *
+     * @return trueの場合は表示
+     */
+    boolean isTrashEnabled() {
+        return mIsEnabled;
+    }
+
+    /**
      * 削除アイコンの拡大・縮小アニメーションのキャンセル
      */
     private void cancelScaleTrashAnimation() {
@@ -672,6 +705,11 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
                 removeMessages(ANIMATION_OPEN);
                 removeMessages(ANIMATION_CLOSE);
                 removeMessages(ANIMATION_FORCE_CLOSE);
+                return;
+            }
+
+            // 有効でない場合はアニメーションを行わない
+            if (!trashView.isTrashEnabled()) {
                 return;
             }
 
