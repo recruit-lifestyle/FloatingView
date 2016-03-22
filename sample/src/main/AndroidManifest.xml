@@ -5,8 +5,6 @@
 
     <!-- 最前面表示時のパーミッション -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <!-- 削除ボタンと重なった時にバイブレーション -->
-    <uses-permission android:name="android.permission.VIBRATE"/>
     <!-- 以下は広告用 -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>

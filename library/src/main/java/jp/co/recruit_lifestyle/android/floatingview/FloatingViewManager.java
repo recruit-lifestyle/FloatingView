@@ -19,7 +19,7 @@ package jp.co.recruit_lifestyle.android.floatingview;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Vibrator;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -65,11 +65,6 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      * 移動しない
      */
     public static final int MOVE_DIRECTION_NONE = 3;
-
-    /**
-     * FloatingViewと削除ボタンが重なった時のバイブレーション時間(ミリ秒)
-     */
-    private static final long VIBRATE_INTERSECTS_MILLIS = 15;
 
     /**
      * Viewの形が円形の場合
@@ -122,11 +117,6 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
     private final Rect mTrashViewRect;
 
     /**
-     * Vibrator
-     */
-    private final Vibrator mVibrator;
-
-    /**
      * タッチの移動を許可するフラグ
      * 画面回転時にタッチ処理を受け付けないようにするためのフラグです
      */
@@ -155,7 +145,6 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         mFloatingViewListener = listener;
         mFloatingViewRect = new Rect();
         mTrashViewRect = new Rect();
-        mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mIsMoveAccept = false;
         mDisplayMode = DISPLAY_MODE_HIDE_FULLSCREEN;
 
@@ -277,7 +266,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             }
             // 重なり始めの場合
             if (isIntersecting && !isIntersect) {
-                mVibrator.vibrate(VIBRATE_INTERSECTS_MILLIS);
+                mTargetFloatingView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                 mTrashView.setScaleTrashIcon(true);
             }
             // 重なり終わりの場合
