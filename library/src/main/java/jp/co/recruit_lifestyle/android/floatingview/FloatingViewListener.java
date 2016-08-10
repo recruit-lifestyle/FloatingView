@@ -26,5 +26,6 @@ public interface FloatingViewListener {
      * FloatingViewを終了する際に呼び出されます。
      */
     void onFinishFloatingView();
+    void onMoveFloatingView(int x, int y);
 
 }
