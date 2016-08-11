@@ -64,6 +64,7 @@ public class ChatHeadService extends Service implements FloatingViewListener {
         mChatHeadServiceBinder = new ChatHeadServiceBinder(this);
         final LayoutInflater inflater = LayoutInflater.from(this);
         final ImageView iconView = (ImageView) inflater.inflate(R.layout.widget_chathead, null, false);
+
         iconView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -77,6 +78,11 @@ public class ChatHeadService extends Service implements FloatingViewListener {
         final FloatingViewManager.Options options = new FloatingViewManager.Options();
         options.shape = FloatingViewManager.SHAPE_CIRCLE;
         options.overMargin = (int) (16 * metrics.density);
+
+        options.animateInitialMove = true;
+        options.floatingViewX = metrics.widthPixels; // Spawn on the right side. If we set it outside of bounds, it will animate in.
+        options.floatingViewY = (int)((float)metrics.heightPixels * 0.33); // Start at 33% from the top.
+
         mFloatingViewManager.addViewToWindow(iconView, options);
 
         // 常駐起動

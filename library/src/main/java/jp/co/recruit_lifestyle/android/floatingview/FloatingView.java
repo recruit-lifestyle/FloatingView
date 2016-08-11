@@ -42,49 +42,49 @@ import android.widget.FrameLayout;
 import java.lang.ref.WeakReference;
 
 /**
- * フローティングViewを表すクラスです。
+ * This class represents a floating View.
  * http://stackoverflow.com/questions/18503050/how-to-create-draggabble-system-alert-in-android
  * FIXME:Nexus5＋YouTubeアプリの場合にナビゲーションバーよりも前面に出てきてしまう
  */
 class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawListener {
 
     /**
-     * 移動に最低必要なしきい値(dp)
+     * Min Threshold to move in dp
      */
     private static final float MOVE_THRESHOLD_DP = 8.0f;
 
     /**
-     * 押下時の拡大率
+     * Scale factor on touch
      */
     private static final float SCALE_PRESSED = 0.9f;
 
     /**
-     * 通常時の拡大率
+     * Normal scale factor
      */
     private static final float SCALE_NORMAL = 1.0f;
 
     /**
-     * 画面端移動アニメーションの時間
+     * Milliseconds the animation runs
      */
     private static final long MOVE_TO_EDGE_DURATION = 450L;
 
     /**
-     * 画面端移動アニメーションの係数
+     * How much it overshoots on the corners of the screen
      */
     private static final float MOVE_TO_EDGE_OVERSHOOT_TENSION = 1.25f;
 
     /**
-     * 通常状態
+     * Normal state
      */
     static final int STATE_NORMAL = 0;
 
     /**
-     * 重なり状態
+     * Intersecting state
      */
     static final int STATE_INTERSECTING = 1;
 
     /**
-     * 終了状態
+     * Done state
      */
     static final int STATE_FINISHING = 2;
 
@@ -160,6 +160,13 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * 初期表示のY座標
      */
     private int mInitY;
+
+
+    public void setAnimateInitialMove(boolean animateInitialMove) {
+        this.mAnimateInitialMove = animateInitialMove;
+    }
+
+    private boolean mAnimateInitialMove = true;
 
     /**
      * ステータスバーの高さ
@@ -292,17 +299,22 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     public boolean onPreDraw() {
         getViewTreeObserver().removeOnPreDrawListener(this);
         // 画面端に移動しない場合は指定座標に移動
-        if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_NONE) {
-            mParams.x = mInitX;
-            mParams.y = mInitY;
-            moveTo(mInitX, mInitY, mInitX, mInitY, false);
-        } else {
-            mParams.x = 0;
-            mParams.y = mMetrics.heightPixels - mStatusBarHeight - getMeasuredHeight();
-            moveToEdge(false);
+
+        if (mInitX == DEFAULT_X) {
+            mInitX = 0;
+        }
+        if (mInitY == DEFAULT_Y) {
+            mInitY = mMetrics.heightPixels - mStatusBarHeight - getMeasuredHeight();
+        }
+
+        // Quick fix to make moveToEdge work.
+        mScreenTouchX = mInitX;
+        mScreenTouchY = mInitY;
+        moveTo(0, 0, mInitX, mInitY, false);
+        if (mMoveDirection != FloatingViewManager.MOVE_DIRECTION_NONE) {
+            moveToEdge(mAnimateInitialMove);
         }
         mIsDraggable = true;
-        mWindowManager.updateViewLayout(this, mParams);
         return true;
     }
 
@@ -624,16 +636,16 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     }
 
     /**
-     * ドラッグ可能フラグ
+     * Set if this view can be dragged
      *
-     * @param isDraggable ドラッグ可能にする場合はtrue
+     * @param isDraggable true if draggable
      */
     void setDraggable(boolean isDraggable) {
         mIsDraggable = isDraggable;
     }
 
     /**
-     * Viewの形を表す定数
+     * View Shape
      *
      * @param shape SHAPE_CIRCLE or SHAPE_RECTANGLE
      */
@@ -665,12 +677,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @param moveDirection 移動方向
      */
     void setMoveDirection(int moveDirection) {
-        // デフォルトから変更されていたら画面端に移動しない
-        if (mInitX != DEFAULT_X || mInitY != DEFAULT_Y) {
-            mMoveDirection = FloatingViewManager.MOVE_DIRECTION_NONE;
-        } else {
-            mMoveDirection = moveDirection;
-        }
+        mMoveDirection = moveDirection;
     }
 
     /**

@@ -1,15 +1,15 @@
 <resources>
     <string name="app_name">FloatingView Sample</string>
-    <string name="chathead_content_title">デモチャット：アクティブ</string>
-    <string name="chathead_content_text">デモ実行中</string>
-    <string name="ad_content_title">デモ広告：アクティブ</string>
-    <string name="ad_content_text">デモ実行中</string>
-    <string name="charhead_click_message">クリック!</string>
-    <string name="error_load_ad">広告が読み込めなかったか、string.xmlの広告ユニットIDが正しく設定されていません</string>
-    <string name="ad_click_message">3秒後に広告アイコンが表示されます</string>
-    <string name="delete_demo">デモ表示を削除</string>
-    <string name="show_demo">デモ表示</string>
-    <string name="show_ad">広告表示</string>
-    <string name="ad_unit_id">ADD_YOUR_UNIT_ID</string>
-    <string name="permission_denied">オーバレイの許可が出ませんでした</string>
+    <string name="chathead_content_title">Demo Chat: Active</string>
+    <string name="chathead_content_text">Demo running.</string>
+    <string name="ad_content_title">Demo Ad active</string>
+    <string name="ad_content_text">Demo running.</string>
+    <string name="charhead_click_message">Click</string>
+    <string name="error_load_ad">Error loading Ad. Check ad unit ID in strings.xml.</string>
+    <string name="ad_click_message">Ad clicked. Showing it after 3 seconds. </string>
+    <string name="delete_demo">App icon deleted.</string>
+    <string name="show_demo">Show Floating Demo</string>
+    <string name="show_ad">Show Ad</string>
+    <string name="ad_unit_id" translatable="false">ADD_YOUR_UNIT_ID</string>
+    <string name="permission_denied">Overlay permission not granted.</string>
 </resources>
