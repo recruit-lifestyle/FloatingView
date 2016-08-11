@@ -396,26 +396,26 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      * @param overMargin マージン
      */
     @Deprecated
-    public void addViewToWindow(View view, float shape, int overMargin) {
+    public FloatingView addViewToWindow(View view, float shape, int overMargin) {
         final Options options = new Options();
         options.shape = shape;
         options.overMargin = overMargin;
-        addViewToWindow(view, options);
+        return addViewToWindow(view, options);
     }
 
     /**
      * ViewをWindowに貼り付けます。
-     *
-     * @param view    フローティングさせるView
+     *  @param view    フローティングさせるView
      * @param options Options
      */
-    public void addViewToWindow(View view, Options options) {
+    public FloatingView addViewToWindow(View view, Options options) {
         final boolean isFirstAttach = mFloatingViewList.isEmpty();
         // FloatingView
         final FloatingView floatingView = new FloatingView(mContext);
         floatingView.setInitCoords(options.floatingViewX, options.floatingViewY);
         floatingView.setOnTouchListener(this);
         floatingView.setShape(options.shape);
+        floatingView.setAnimateInitialMove(options.animateInitialMove);
         floatingView.setOverMargin(options.overMargin);
         floatingView.setMoveDirection(options.moveDirection);
         floatingView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
@@ -446,6 +446,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         }
         // 必ずトップに来て欲しいので毎回貼り付け
         mWindowManager.addView(mTrashView, mTrashView.getWindowLayoutParams());
+        return floatingView;
     }
 
     /**
@@ -515,6 +516,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
          * ※座標を指定すると自動的にMOVE_DIRECTION_NONEになります
          */
         public int moveDirection;
+        public boolean animateInitialMove;
 
         /**
          * オプションのデフォルト値を設定します。
@@ -525,6 +527,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             floatingViewX = FloatingView.DEFAULT_X;
             floatingViewY = FloatingView.DEFAULT_Y;
             moveDirection = MOVE_DIRECTION_DEFAULT;
+            animateInitialMove = true;
         }
 
     }
