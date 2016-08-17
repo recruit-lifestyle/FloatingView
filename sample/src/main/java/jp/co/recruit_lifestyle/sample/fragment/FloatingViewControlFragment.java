@@ -2,14 +2,13 @@ package jp.co.recruit_lifestyle.sample.fragment;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,28 +65,14 @@ public class FloatingViewControlFragment extends Fragment {
         rootView.findViewById(R.id.show_demo).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Context context = getActivity();
-                final boolean canShow = showChatHead(context);
-                if (!canShow) {
-                    // シンプルなFloatingViewの表示許可設定
-                    @SuppressLint("InlinedApi")
-                    final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
-                    startActivityForResult(intent, CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE);
-                }
+                showChatHead(getActivity(), true);
             }
         });
         // メールデモの表示
         rootView.findViewById(R.id.show_mail_demo).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Context context = getActivity();
-                final boolean canShow = showFloatingMail(context);
-                if (!canShow) {
-                    // メールトリガーのFloatingViewの表示許可設定
-                    @SuppressLint("InlinedApi")
-                    final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
-                    startActivityForResult(intent, MAIL_OVERLAY_PERMISSION_REQUEST_CODE);
-                }
+                showFloatingMail(getActivity(), true);
             }
         });
         return rootView;
@@ -100,63 +85,63 @@ public class FloatingViewControlFragment extends Fragment {
     @TargetApi(Build.VERSION_CODES.M)
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE) {
-            final Context context = getActivity();
-            final boolean canShow = showChatHead(context);
-            if (!canShow) {
-                Log.w(TAG, getString(R.string.permission_denied));
-            }
+            showChatHead(getActivity(), false);
         } else if (requestCode == MAIL_OVERLAY_PERMISSION_REQUEST_CODE) {
-            final Context context = getActivity();
-            final boolean canShow = showFloatingMail(context);
-            if (!canShow) {
-                Log.w(TAG, getString(R.string.permission_denied));
-            }
+            showFloatingMail(getActivity(), false);
         }
     }
 
     /**
      * シンプルなFloatingViewの表示
      *
-     * @param context Context
-     * @return 表示できる場合はtrue, 表示できない場合はfalse
+     * @param context                 Context
+     * @param isShowOverlayPermission 表示できなかった場合に表示許可の画面を表示するフラグ
      */
     @SuppressLint("NewApi")
-    private boolean showChatHead(Context context) {
+    private void showChatHead(Context context, boolean isShowOverlayPermission) {
         // API22以下かチェック
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
             context.startService(new Intent(context, ChatHeadService.class));
-            return true;
+            return;
         }
 
         // 他のアプリの上に表示できるかチェック
         if (Settings.canDrawOverlays(context)) {
             context.startService(new Intent(context, ChatHeadService.class));
-            return true;
+            return;
         }
 
-        return false;
+        // オーバレイパーミッションの表示
+        if (isShowOverlayPermission) {
+            final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
+            startActivityForResult(intent, CHATHEAD_OVERLAY_PERMISSION_REQUEST_CODE);
+        }
     }
 
     /**
      * メール表示のFloatingViewの表示
      *
-     * @param context Context
-     * @return 表示できる場合はtrue, 表示できない場合はfalse
+     * @param context                 Context
+     * @param isShowOverlayPermission 表示できなかった場合に表示許可の画面を表示するフラグ
      */
     @SuppressLint("NewApi")
-    private boolean showFloatingMail(Context context) {
+    private void showFloatingMail(Context context, boolean isShowOverlayPermission) {
         // API22以下かチェック
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
             context.startService(new Intent(context, FloatingMailService.class));
-            return true;
+            return;
         }
 
         // 他のアプリの上に表示できるかチェック
         if (Settings.canDrawOverlays(context)) {
             context.startService(new Intent(context, FloatingMailService.class));
-            return true;
+            return;
         }
 
-        return false;
+        // オーバレイパーミッションの表示
+        if (isShowOverlayPermission) {
+            final Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
+            startActivityForResult(intent, MAIL_OVERLAY_PERMISSION_REQUEST_CODE);
+        }
     }
 }

@@ -1,13 +1,13 @@
 package jp.co.recruit_lifestyle.sample;
 
-import android.app.Activity;
-import android.app.FragmentTransaction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 
 import jp.co.recruit.floatingview.R;
 import jp.co.recruit_lifestyle.sample.fragment.ChatHeadFragment;
@@ -16,7 +16,7 @@ import jp.co.recruit_lifestyle.sample.service.ChatHeadService;
 /**
  * チャットヘッド画面のアクティビティです。
  */
-public class ChatHeadActivity extends Activity implements ServiceConnection, ChatHeadFragment.ChatHeadActionCallback {
+public class ChatHeadActivity extends AppCompatActivity implements ServiceConnection, ChatHeadFragment.ChatHeadActionCallback {
 
     /**
      * 設定フラグメントのタグ
@@ -37,7 +37,7 @@ public class ChatHeadActivity extends Activity implements ServiceConnection, Cha
         setContentView(R.layout.activity_chathead);
 
         if (savedInstanceState == null) {
-            final FragmentTransaction ft = getFragmentManager().beginTransaction();
+            final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.add(R.id.container, ChatHeadFragment.newInstance(), FRAGMENT_TAG_CHATHEAD);
             ft.commit();
         }

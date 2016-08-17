@@ -1,8 +1,8 @@
 package jp.co.recruit_lifestyle.sample.fragment;
 
-import android.app.Activity;
-import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,12 +34,12 @@ public class ChatHeadFragment extends Fragment {
      * {@inheritDoc}
      */
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         try {
-            mChatHeadActionCallback = (ChatHeadActionCallback) activity;
+            mChatHeadActionCallback = (ChatHeadActionCallback) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
+            throw new ClassCastException(context.toString()
                     + " must implement " + ChatHeadActionCallback.class.toString());
         }
     }
