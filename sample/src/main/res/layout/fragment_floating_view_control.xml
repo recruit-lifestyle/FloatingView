@@ -5,7 +5,7 @@
               android:orientation="vertical">
 
     <Button
-        android:id="@+id/showDemo"
+        android:id="@+id/show_demo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/show_demo"/>
@@ -15,8 +15,8 @@
         android:layout_height="20dp"/>
 
     <Button
-        android:id="@+id/showAd"
+        android:id="@+id/show_mail_demo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/show_ad"/>
+        android:text="@string/show_mail_demo"/>
 </LinearLayout>

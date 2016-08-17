@@ -68,7 +68,6 @@ Describe the process (onFinishFloatingView) that is called when you exit the Flo
 5) Add the permission to AndroidManifest
 ```xml
  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
- <uses-permission android:name="android.permission.VIBRATE"/>
 ```  
   
 6) Define the Service to AndroidManifest
@@ -89,13 +88,6 @@ example)
     final Activity activity = getActivity();
     activity.startService(new Intent(activity, ChatHeadService.class));
 ```
-  
-Info.
-If you want to use the FloatingAdService,replace the ad_unit_id(string.xml) with your ad unit id (Interstitial Ad).
-```xml
- <string name="ad_unit_id">ADD_YOUR_UNIT_ID</string>
-```  
-Reference：[Give your app an Ad Unit ID](https://developers.google.com/admob/android/quick-start?hl=en#give_your_app_an_ad_unit_id)  
 
 ## Credits
 

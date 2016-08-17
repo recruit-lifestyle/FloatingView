@@ -67,7 +67,7 @@ public class ChatHeadService extends Service implements FloatingViewListener {
         iconView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, getString(R.string.charhead_click_message));
+                Log.d(TAG, getString(R.string.chathead_click_message));
             }
         });
 
@@ -128,7 +128,7 @@ public class ChatHeadService extends Service implements FloatingViewListener {
         builder.setWhen(System.currentTimeMillis());
         builder.setSmallIcon(R.mipmap.ic_launcher);
         builder.setContentTitle(getString(R.string.chathead_content_title));
-        builder.setContentText(getString(R.string.chathead_content_text));
+        builder.setContentText(getString(R.string.content_text));
         builder.setOngoing(true);
         builder.setPriority(NotificationCompat.PRIORITY_MIN);
         builder.setCategory(NotificationCompat.CATEGORY_SERVICE);

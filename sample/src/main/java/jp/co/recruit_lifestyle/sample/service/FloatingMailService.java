@@ -4,32 +4,29 @@ import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
-
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.InterstitialAd;
 
 import jp.co.recruit.floatingview.R;
 import jp.co.recruit_lifestyle.android.floatingview.FloatingViewListener;
 import jp.co.recruit_lifestyle.android.floatingview.FloatingViewManager;
 
 /**
- * 広告を表示するサービスです。
+ * メールアプリ起動を行うサービスです。
  */
-public class FloatingAdService extends Service implements FloatingViewListener {
+public class FloatingMailService extends Service implements FloatingViewListener {
 
     /**
      * デバッグログ用のタグ
      */
-    private static final String TAG = "FloatingAdService";
+    private static final String TAG = "FloatingMailService";
 
     /**
      * 通知ID
@@ -40,31 +37,6 @@ public class FloatingAdService extends Service implements FloatingViewListener {
      * FloatingViewManager
      */
     private FloatingViewManager mFloatingViewManager;
-
-    /**
-     * {@link InterstitialAd}
-     */
-    private InterstitialAd mInterstitialAd;
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        // 全面広告の設定
-        final AdRequest.Builder builder = new AdRequest.Builder();
-        final AdRequest adRequest = builder.build();
-        mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdListener(new AdListener() {
-            @Override
-            public void onAdOpened() {
-                super.onAdOpened();
-                stopSelf();
-            }
-        });
-
-        mInterstitialAd.setAdUnitId(getString(R.string.ad_unit_id));
-        mInterstitialAd.loadAd(adRequest);
-
-    }
 
     /**
      * {@inheritDoc}
@@ -80,16 +52,16 @@ public class FloatingAdService extends Service implements FloatingViewListener {
         final WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         windowManager.getDefaultDisplay().getMetrics(metrics);
         final LayoutInflater inflater = LayoutInflater.from(this);
-        final ImageView iconView = (ImageView) inflater.inflate(R.layout.widget_ad, null, false);
+        final ImageView iconView = (ImageView) inflater.inflate(R.layout.widget_mail, null, false);
         iconView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 全面広告を読み込んでいる場合
-                if (mInterstitialAd.isLoaded()) {
-                    mInterstitialAd.show();
-                } else {
-                    Log.e(TAG, getString(R.string.error_load_ad));
-                }
+                // メールアプリの起動
+                final Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", getString(R.string.mail_address), null));
+                intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.mail_title));
+                intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.mail_content));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
             }
         });
 
@@ -97,8 +69,8 @@ public class FloatingAdService extends Service implements FloatingViewListener {
         mFloatingViewManager.setFixedTrashIconImage(R.drawable.ic_trash_fixed);
         mFloatingViewManager.setActionTrashIconImage(R.drawable.ic_trash_action);
         final FloatingViewManager.Options options = new FloatingViewManager.Options();
-        options.shape = FloatingViewManager.SHAPE_CIRCLE;
-        options.overMargin = (int) (16 * metrics.density);
+        options.shape = FloatingViewManager.SHAPE_RECTANGLE;
+        options.overMargin = 0;
         // Origin left-bottom
         //options.floatingViewX = metrics.widthPixels / 2;
         //options.floatingViewY = metrics.heightPixels / 2;
@@ -124,6 +96,7 @@ public class FloatingAdService extends Service implements FloatingViewListener {
     /**
      * {@inheritDoc}
      */
+    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -154,13 +127,12 @@ public class FloatingAdService extends Service implements FloatingViewListener {
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setWhen(System.currentTimeMillis());
         builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setContentTitle(getString(R.string.ad_content_title));
-        builder.setContentText(getString(R.string.ad_content_text));
+        builder.setContentTitle(getString(R.string.mail_content_title));
+        builder.setContentText(getString(R.string.content_text));
         builder.setOngoing(true);
         builder.setPriority(NotificationCompat.PRIORITY_MIN);
         builder.setCategory(NotificationCompat.CATEGORY_SERVICE);
 
         return builder.build();
     }
-
 }

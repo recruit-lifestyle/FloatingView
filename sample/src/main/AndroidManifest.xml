@@ -5,9 +5,6 @@
 
     <!-- 最前面表示時のパーミッション -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <!-- 以下は広告用 -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:allowBackup="true"
@@ -15,9 +12,6 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
 
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version"/>
         <activity
             android:name="jp.co.recruit_lifestyle.sample.MainActivity"
             android:label="@string/app_name">
@@ -32,17 +26,13 @@
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
             android:taskAffinity="jp.co.recruit.floatingview.ChatHeadActivity"/>
-        <!-- 広告 -->
-        <activity
-            android:name="com.google.android.gms.ads.AdActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
         <!-- デモ表示サービス -->
         <service
             android:name="jp.co.recruit_lifestyle.sample.service.ChatHeadService"
             android:exported="false"/>
-        <!-- 広告表示サービス -->
+        <!-- メール起動サービス -->
         <service
-            android:name="jp.co.recruit_lifestyle.sample.service.FloatingAdService"
+            android:name="jp.co.recruit_lifestyle.sample.service.FloatingMailService"
             android:exported="false"/>
 
     </application>

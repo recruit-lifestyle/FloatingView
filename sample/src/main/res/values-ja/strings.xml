@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">FloatingView Sample</string>
+    <string name="chathead_content_title">デモチャット：アクティブ</string>
+    <string name="content_text">デモ実行中</string>
+    <string name="mail_content_title">メールデモ：アクティブ</string>
+    <string name="chathead_click_message">クリック!</string>
+    <string name="delete_demo">デモ表示を削除</string>
+    <string name="show_demo">デモ表示</string>
+    <string name="show_mail_demo">メールデモ表示</string>
+    <string name="permission_denied">オーバレイの許可が出ませんでした</string>
+    <string name="mail_address">example@example.com</string>
+    <string name="mail_title">タイトル</string>
+    <string name="mail_content">メッセージ</string>
+</resources>
