@@ -2,21 +2,20 @@
 The Android project is View to display information such as chat in front.  
 To API Level 14 or later are supported  
 
-##Screenshots
+## Screenshots
 ![](./screenshot/animation.gif)  
 <img src="./screenshot/ss01.png" width="200">
 <img src="./screenshot/ss02.png" width="200">
 <img src="./screenshot/ss03.png" width="200">
   
 *Watch YouTube video*  
-[SimpleFloating](http://youtu.be/nb8M2p0agF4)  
-[FloatingAd](http://youtu.be/PmvbQzxSBU0)
+[SimpleFloating](http://youtu.be/nb8M2p0agF4)
 
 ## Requirements
-Target Sdk Version : 23  
+Target Sdk Version : 24
 Min Sdk Version : 14  
 
-##How to use
+## How to use
 1) Add this to your **build.gradle**.
   ```java
   repositories {
@@ -26,22 +25,22 @@ Min Sdk Version : 14
   }
 
   dependencies {
-    compile 'com.github.recruit-lifestyle:FloatingView:1.7'
+    compile 'com.github.recruit-lifestyle:FloatingView:2.0'
   }
   ```
   
 2) Implement Service for displaying FloatingView
 ```java
 public class ChatHeadService extends Service {
-  ・・・
+  ... ...
 }
 ```
   
-3) You will do the setting of the View to be displayed in the FloatingView（Sample have a set in onStartCommand）
+3) You will do the setting of the View to be displayed in the FloatingView(Sample have a set in onStartCommand)
 ```java
   final LayoutInflater inflater = LayoutInflater.from(this);
   final ImageView iconView = (ImageView) inflater.inflate(R.layout.widget_chathead, null, false);
-  iconView.setOnClickListener(・・・);
+  iconView.setOnClickListener(......);
 ```  
 
 4) Use the FloatingViewManager, make the setting of FloatingView
@@ -73,13 +72,13 @@ Describe the process (onFinishFloatingView) that is called when you exit the Flo
 6) Define the Service to AndroidManifest
 example)
 ```java
-    <application ・・・>
-        ・・・
+    <application ...>
+        ...
         <!-- Demo -->
         <service
             android:name="jp.co.recruit_lifestyle.sample.service.ChatHeadService"
             android:exported="false"/>
-        ・・・
+        ...
     </application>
 ```
   
@@ -96,7 +95,7 @@ FloatingView is owned and maintained by [RECRUIT LIFESTYLE CO., LTD.](http://www
 FloatingView was originally created by [Yoshihide Sogawa](https://twitter.com/egg_sogawa)  
 
 
-##License
+## License
 
     Copyright 2015 RECRUIT LIFESTYLE CO., LTD.
 
