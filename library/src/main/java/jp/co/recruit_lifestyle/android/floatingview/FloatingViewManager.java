@@ -378,22 +378,6 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
 
     /**
      * ViewをWindowに貼り付けます。
-     * This method was deprecated in 1.2. Use #addViewToWindow(View, Options)
-     *
-     * @param view       フローティングさせるView
-     * @param shape      フローティングさせるViewの矩形（SHAPE_RECTANGLE or SHAPE_CIRCLE）
-     * @param overMargin マージン
-     */
-    @Deprecated
-    public void addViewToWindow(View view, float shape, int overMargin) {
-        final Options options = new Options();
-        options.shape = shape;
-        options.overMargin = overMargin;
-        addViewToWindow(view, options);
-    }
-
-    /**
-     * ViewをWindowに貼り付けます。
      *
      * @param view    フローティングさせるView
      * @param options Options
