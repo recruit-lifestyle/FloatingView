@@ -162,6 +162,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private int mInitY;
 
     /**
+     * 初期表示時にアニメーションするフラグ
+     */
+    private boolean mAnimateInitialMove;
+
+    /**
      * ステータスバーの高さ
      */
     private final int mStatusBarHeight;
@@ -291,15 +296,25 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     @Override
     public boolean onPreDraw() {
         getViewTreeObserver().removeOnPreDrawListener(this);
+        // X座標に初期値が設定されていればデフォルト値を入れる(マージンは考慮しない)
+        if (mInitX == DEFAULT_X) {
+            mInitX = 0;
+        }
+        // Y座標に初期値が設定されていればデフォルト値を入れる
+        if (mInitY == DEFAULT_Y) {
+            mInitY = mMetrics.heightPixels - mStatusBarHeight - getMeasuredHeight();
+        }
+
+        // 初期位置を設定
+        mParams.x = mInitX;
+        mParams.y = mInitY;
+
         // 画面端に移動しない場合は指定座標に移動
         if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_NONE) {
-            mParams.x = mInitX;
-            mParams.y = mInitY;
             moveTo(mInitX, mInitY, mInitX, mInitY, false);
         } else {
-            mParams.x = 0;
-            mParams.y = mMetrics.heightPixels - mStatusBarHeight - getMeasuredHeight();
-            moveToEdge(false);
+            // 初期位置から画面端に移動
+            moveToEdge(mInitX, mInitY, mAnimateInitialMove);
         }
         mIsDraggable = true;
         mWindowManager.updateViewLayout(this, mParams);
@@ -518,14 +533,25 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @param withAnimation アニメーションを行う場合はtrue.行わない場合はfalse
      */
     private void moveToEdge(boolean withAnimation) {
-        //TODO:縦軸の速度も考慮して斜めに行くようにする
-        // X・Y座標と移動方向を設定
         final int currentX = getXByTouch();
         final int currentY = getYByTouch();
+        moveToEdge(currentX, currentY, withAnimation);
+    }
+
+    /**
+     * 始点を指定して左右の端に移動します。
+     *
+     * @param startX        X座標の初期値
+     * @param startY        Y座標の初期値
+     * @param withAnimation アニメーションを行う場合はtrue.行わない場合はfalse
+     */
+    private void moveToEdge(int startX, int startY, boolean withAnimation) {
+        //TODO:縦軸の速度も考慮して斜めに行くようにする
+        // X・Y座標と移動方向を設定
         final int goalPositionX;
         // 画面端に移動する場合は画面端の座標を設定
         if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_DEFAULT) {
-            final boolean isMoveRightEdge = currentX > (mMetrics.widthPixels - getWidth()) / 2;
+            final boolean isMoveRightEdge = startX > (mMetrics.widthPixels - getWidth()) / 2;
             goalPositionX = isMoveRightEdge ? mPositionLimitRect.right : mPositionLimitRect.left;
         }
         // 左端への移動
@@ -538,12 +564,12 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         }
         // 画面端に移動しない場合は、現在の座標のまま
         else {
-            goalPositionX = currentX;
+            goalPositionX = startX;
         }
         // TODO:Y座標もアニメーションさせる
-        final int goalPositionY = currentY;
+        final int goalPositionY = startY;
         // 指定座標に移動
-        moveTo(currentX, currentY, goalPositionX, goalPositionY, withAnimation);
+        moveTo(startX, startY, goalPositionX, goalPositionY, withAnimation);
     }
 
     /**
@@ -665,12 +691,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @param moveDirection 移動方向
      */
     void setMoveDirection(int moveDirection) {
-        // デフォルトから変更されていたら画面端に移動しない
-        if (mInitX != DEFAULT_X || mInitY != DEFAULT_Y) {
-            mMoveDirection = FloatingViewManager.MOVE_DIRECTION_NONE;
-        } else {
-            mMoveDirection = moveDirection;
-        }
+        mMoveDirection = moveDirection;
     }
 
     /**
@@ -682,6 +703,15 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     void setInitCoords(int x, int y) {
         mInitX = x;
         mInitY = y;
+    }
+
+    /**
+     * 初期表示時にアニメーションするフラグを設定します。
+     *
+     * @param animateInitialMove 初期表示時にアニメーションする場合はtrue
+     */
+    void setAnimateInitialMove(boolean animateInitialMove) {
+        mAnimateInitialMove = animateInitialMove;
     }
 
     /**

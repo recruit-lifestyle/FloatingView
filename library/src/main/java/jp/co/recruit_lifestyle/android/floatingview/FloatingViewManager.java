@@ -391,6 +391,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         floatingView.setShape(options.shape);
         floatingView.setOverMargin(options.overMargin);
         floatingView.setMoveDirection(options.moveDirection);
+        floatingView.setAnimateInitialMove(options.animateInitialMove);
         floatingView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
@@ -490,6 +491,11 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         public int moveDirection;
 
         /**
+         * 初期表示時にアニメーションするフラグ
+         */
+        public boolean animateInitialMove;
+
+        /**
          * オプションのデフォルト値を設定します。
          */
         public Options() {
@@ -498,6 +504,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             floatingViewX = FloatingView.DEFAULT_X;
             floatingViewY = FloatingView.DEFAULT_Y;
             moveDirection = MOVE_DIRECTION_DEFAULT;
+            animateInitialMove = true;
         }
 
     }

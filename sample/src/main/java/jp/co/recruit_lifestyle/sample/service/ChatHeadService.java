@@ -77,6 +77,11 @@ public class ChatHeadService extends Service implements FloatingViewListener {
         final FloatingViewManager.Options options = new FloatingViewManager.Options();
         options.shape = FloatingViewManager.SHAPE_CIRCLE;
         options.overMargin = (int) (16 * metrics.density);
+        options.animateInitialMove = true;
+        // Spawn on the right side. If we set it outside of bounds, it will animate in
+        // Start at 66% from the bottom.
+        options.floatingViewX = metrics.widthPixels / 2;
+        options.floatingViewY = (int) (metrics.heightPixels * 0.66);
         mFloatingViewManager.addViewToWindow(iconView, options);
 
         // 常駐起動
