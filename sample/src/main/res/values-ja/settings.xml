@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title_shape">形状</string>
+    <string name="settings_title_display_mode">表示モード</string>
+    <string name="settings_title_margin">画面端のマージン</string>
+    <string name="settings_title_move_direction">吸着方向</string>
+    <string name="settings_title_init_x">X座標の初期値</string>
+    <string name="settings_dialog_title_init_x">左側からの比率</string>
+    <string name="settings_title_init_y">Y座標の初期値</string>
+    <string name="settings_dialog_title_init_y">下部からの比率</string>
+    <string name="settings_title_animation">初回表示アニメーション</string>
+
+    <string-array name="settings_entries_shape">
+        <item>円</item>
+        <item>四角</item>
+    </string-array>
+
+    <string-array name="settings_entries_display_mode">
+        <item>常に表示</item>
+        <item>フルスクリーン時に非表示</item>
+        <item>非表示（通知から終了してください）</item>
+    </string-array>
+
+    <string-array name="settings_entries_move_direction">
+        <item>デフォルト(画面端に近い方)</item>
+        <item>左のみ</item>
+        <item>右のみ</item>
+        <item>吸着しない</item>
+    </string-array>
+
+</resources>

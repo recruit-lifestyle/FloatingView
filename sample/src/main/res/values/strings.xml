@@ -3,11 +3,12 @@
     <string name="app_name">FloatingView Sample</string>
     <string name="chathead_content_title">Demo Chat: Active</string>
     <string name="content_text">Demo running.</string>
-    <string name="mail_content_title">Demo Mail: active</string>
+    <string name="mail_content_title">Demo Customize: active</string>
     <string name="chathead_click_message">Click</string>
-    <string name="delete_demo">Demo icon deleted.</string>
-    <string name="show_demo">Show Floating Demo</string>
-    <string name="show_mail_demo">Show Floating Mail Demo</string>
+    <string name="delete_demo">Delete Demo</string>
+    <string name="show_demo">Show Simple FloatingView</string>
+    <string name="show_customized_demo">Show Customized FloatingView</string>
+    <string name="show_settings">Initial Settings</string>
     <string name="permission_denied">Overlay permission not granted.</string>
     <string name="mail_address">example@example.com</string>
     <string name="mail_title">Title</string>

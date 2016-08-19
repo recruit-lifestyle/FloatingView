@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:defaultValue="Circle"
+        android:entries="@array/settings_entries_shape"
+        android:entryValues="@array/settings_values_shape"
+        android:key="settings_shape"
+        android:summary="%s"
+        android:title="@string/settings_title_shape"/>
+
+    <ListPreference
+        android:defaultValue="FullScreen"
+        android:entries="@array/settings_entries_display_mode"
+        android:entryValues="@array/settings_values_display_mode"
+        android:key="settings_display_mode"
+        android:summary="%s"
+        android:title="@string/settings_title_display_mode"/>
+
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/settings_entries_margin"
+        android:entryValues="@array/settings_values_margin"
+        android:key="settings_margin"
+        android:summary="%s"
+        android:title="@string/settings_title_margin"/>
+
+    <ListPreference
+        android:defaultValue="Default"
+        android:entries="@array/settings_entries_move_direction"
+        android:entryValues="@array/settings_values_move_direction"
+        android:key="settings_move_direction"
+        android:summary="%s"
+        android:title="@string/settings_title_move_direction"/>
+
+    <ListPreference
+        android:defaultValue="0"
+        android:dialogTitle="@string/settings_dialog_title_init_x"
+        android:entries="@array/settings_entries_init_x"
+        android:entryValues="@array/settings_values_init_x"
+        android:key="settings_init_x"
+        android:summary="%s"
+        android:title="@string/settings_title_init_x"/>
+
+    <ListPreference
+        android:defaultValue="1.0"
+        android:dialogTitle="@string/settings_dialog_title_init_y"
+        android:entries="@array/settings_entries_init_y"
+        android:entryValues="@array/settings_values_init_y"
+        android:key="settings_init_y"
+        android:summary="%s"
+        android:title="@string/settings_title_init_y"/>
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="settings_animation"
+        android:title="@string/settings_title_animation"/>
+
+</PreferenceScreen>

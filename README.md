@@ -49,7 +49,6 @@ public class ChatHeadService extends Service {
   mFloatingViewManager.setFixedTrashIconImage(R.drawable.ic_trash_fixed);
   mFloatingViewManager.setActionTrashIconImage(R.drawable.ic_trash_action);
   final FloatingViewManager.Options options = new FloatingViewManager.Options();
-  options.shape = FloatingViewManager.SHAPE_CIRCLE;
   options.overMargin = (int) (16 * metrics.density);
   mFloatingViewManager.addViewToWindow(iconView, options);
 ```  

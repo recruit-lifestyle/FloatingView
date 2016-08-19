@@ -22,7 +22,7 @@
         </activity>
         <!-- デモ画面 -->
         <activity
-            android:name="jp.co.recruit_lifestyle.sample.ChatHeadActivity"
+            android:name="jp.co.recruit_lifestyle.sample.DeleteActionActivity"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
             android:taskAffinity="jp.co.recruit.floatingview.ChatHeadActivity"/>
@@ -30,9 +30,9 @@
         <service
             android:name="jp.co.recruit_lifestyle.sample.service.ChatHeadService"
             android:exported="false"/>
-        <!-- メール起動サービス -->
+        <!-- カスタムデモ表示サービス -->
         <service
-            android:name="jp.co.recruit_lifestyle.sample.service.FloatingMailService"
+            android:name="jp.co.recruit_lifestyle.sample.service.CustomFloatingViewService"
             android:exported="false"/>
 
     </application>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title_shape">Shape</string>
+    <string name="settings_title_display_mode">Display Mode</string>
+    <string name="settings_title_margin">Margin</string>
+    <string name="settings_title_move_direction">Move direction</string>
+    <string name="settings_title_init_x">Initial X coordinate(from left side)</string>
+    <string name="settings_dialog_title_init_x">From left side ratio</string>
+    <string name="settings_title_init_y">Initial X coordinate(from bottom side)</string>
+    <string name="settings_dialog_title_init_y">From bottom side ratio</string>
+    <string name="settings_title_animation">Initial animation</string>
+
+    <string-array name="settings_entries_shape">
+        <item>Circle</item>
+        <item>Rectangle</item>
+    </string-array>
+
+    <string-array name="settings_values_shape">
+        <item>Circle</item>
+        <item>Rectangle</item>
+    </string-array>
+
+    <string-array name="settings_entries_display_mode">
+        <item>Show Always</item>
+        <item>Hide Full Screen</item>
+        <item>Invisible(Please close from notification)</item>
+    </string-array>
+
+    <string-array name="settings_values_display_mode">
+        <item>Always</item>
+        <item>FullScreen</item>
+        <item>Hide</item>
+    </string-array>
+
+    <string-array name="settings_entries_margin">
+        <item>-16dp</item>
+        <item>-8dp</item>
+        <item>0dp</item>
+        <item>8dp</item>
+        <item>16dp</item>
+    </string-array>
+
+    <string-array name="settings_values_margin">
+        <item>-16</item>
+        <item>-8</item>
+        <item>0</item>
+        <item>8</item>
+        <item>16</item>
+    </string-array>
+
+    <string-array name="settings_entries_move_direction">
+        <item>Default</item>
+        <item>Left only</item>
+        <item>Right only</item>
+        <item>Fix</item>
+    </string-array>
+
+    <string-array name="settings_values_move_direction">
+        <item>Default</item>
+        <item>Left</item>
+        <item>Right</item>
+        <item>Fix</item>
+    </string-array>
+
+    <string-array name="settings_entries_init_x">
+        <item>-50%</item>
+        <item>0%</item>
+        <item>25%</item>
+        <item>50%</item>
+        <item>75%</item>
+        <item>100%</item>
+        <item>150%</item>
+    </string-array>
+
+    <string-array name="settings_values_init_x">
+        <item>-0.5</item>
+        <item>0</item>
+        <item>0.25</item>
+        <item>0.5</item>
+        <item>0.75</item>
+        <item>1.0</item>
+        <item>1.5</item>
+    </string-array>
+
+    <string-array name="settings_entries_init_y">
+        <item>-50%</item>
+        <item>0%</item>
+        <item>25%</item>
+        <item>50%</item>
+        <item>75%</item>
+        <item>100%</item>
+        <item>150%</item>
+    </string-array>
+
+    <string-array name="settings_values_init_y">
+        <item>-0.5</item>
+        <item>0</item>
+        <item>0.25</item>
+        <item>0.5</item>
+        <item>0.75</item>
+        <item>1.0</item>
+        <item>1.5</item>
+    </string-array>
+
+</resources>
