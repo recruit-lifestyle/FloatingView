@@ -1042,7 +1042,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         /**
          * TrashView
          */
-        private WeakReference<FloatingView> mFloatingView;
+        private final WeakReference<FloatingView> mFloatingView;
 
         /**
          * アニメーションなしの状態を表す定数
