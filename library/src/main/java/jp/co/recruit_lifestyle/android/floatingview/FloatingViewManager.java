@@ -285,6 +285,10 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
                 mTrashView.setScaleTrashIcon(false);
             }
             mIsMoveAccept = false;
+            if (mFloatingViewListener != null) {
+                final WindowManager.LayoutParams params = mTargetFloatingView.getWindowLayoutParams();
+                mFloatingViewListener.onMoveFloatingView(params.x, params.y);
+            }
         }
 
         // TrashViewにイベントを通知
