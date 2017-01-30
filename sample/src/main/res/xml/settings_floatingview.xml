@@ -33,8 +33,16 @@
         android:summary="%s"
         android:title="@string/settings_title_move_direction"/>
 
+    <SwitchPreference
+        android:defaultValue="false"
+        android:disableDependentsState="true"
+        android:key="settings_save_last_position"
+        android:summary="@string/settings_summary_save_position"
+        android:title="@string/settings_title_save_position"/>
+
     <ListPreference
         android:defaultValue="0"
+        android:dependency="settings_save_last_position"
         android:dialogTitle="@string/settings_dialog_title_init_x"
         android:entries="@array/settings_entries_init_x"
         android:entryValues="@array/settings_values_init_x"
@@ -44,6 +52,7 @@
 
     <ListPreference
         android:defaultValue="1.0"
+        android:dependency="settings_save_last_position"
         android:dialogTitle="@string/settings_dialog_title_init_y"
         android:entries="@array/settings_entries_init_y"
         android:entryValues="@array/settings_values_init_y"

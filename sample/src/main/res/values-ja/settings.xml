@@ -4,6 +4,8 @@
     <string name="settings_title_display_mode">表示モード</string>
     <string name="settings_title_margin">画面端のマージン</string>
     <string name="settings_title_move_direction">吸着方向</string>
+    <string name="settings_title_save_position">前回の位置を保存</string>
+    <string name="settings_summary_save_position">X,Y座標の初期位置を無視</string>
     <string name="settings_title_init_x">X座標の初期値</string>
     <string name="settings_dialog_title_init_x">左側からの比率</string>
     <string name="settings_title_init_y">Y座標の初期値</string>

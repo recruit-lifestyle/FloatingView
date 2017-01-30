@@ -43,6 +43,16 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
     private static final int NOTIFICATION_ID = 908114;
 
     /**
+     * Prefs Key(Last position X)
+     */
+    private static final String PREF_KEY_LAST_POSITION_X = "last_position_x";
+
+    /**
+     * Prefs Key(Last position Y)
+     */
+    private static final String PREF_KEY_LAST_POSITION_Y = "last_position_y";
+
+    /**
      * CustomFloatingViewServiceBinder
      */
     private IBinder mCustomFloatingViewServiceBinder;
@@ -126,7 +136,13 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
      */
     @Override
     public void onTouchFinished(boolean isFinishing, int x, int y) {
-        // No Tracking
+        if (!isFinishing) {
+            // Save the last position
+            final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+            editor.putInt(PREF_KEY_LAST_POSITION_X, x);
+            editor.putInt(PREF_KEY_LAST_POSITION_Y, y);
+            editor.apply();
+        }
     }
 
     /**
@@ -211,13 +227,23 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
             options.moveDirection = FloatingViewManager.MOVE_DIRECTION_NONE;
         }
 
-        // Init X/Y
-        final String initXSettings = sharedPref.getString("settings_init_x", "");
-        final String initYSettings = sharedPref.getString("settings_init_y", "");
-        if (!TextUtils.isEmpty(initXSettings) && !TextUtils.isEmpty(initYSettings)) {
-            final int offset = (int) (48 + 8 * metrics.density);
-            options.floatingViewX = (int) (metrics.widthPixels * Float.parseFloat(initXSettings) - offset);
-            options.floatingViewY = (int) (metrics.heightPixels * Float.parseFloat(initYSettings) - offset);
+        // Last position
+        final boolean isUseLastPosition = sharedPref.getBoolean("settings_save_last_position", false);
+        if (isUseLastPosition) {
+            final int defaultX = options.floatingViewX;
+            final int defaultY = options.floatingViewY;
+            options.floatingViewX = sharedPref.getInt(PREF_KEY_LAST_POSITION_X, defaultX);
+            options.floatingViewY = sharedPref.getInt(PREF_KEY_LAST_POSITION_Y, defaultY);
+            System.out.println("(" + options.floatingViewX + "," + options.floatingViewY + ")");
+        } else {
+            // Init X/Y
+            final String initXSettings = sharedPref.getString("settings_init_x", "");
+            final String initYSettings = sharedPref.getString("settings_init_y", "");
+            if (!TextUtils.isEmpty(initXSettings) && !TextUtils.isEmpty(initYSettings)) {
+                final int offset = (int) (48 + 8 * metrics.density);
+                options.floatingViewX = (int) (metrics.widthPixels * Float.parseFloat(initXSettings) - offset);
+                options.floatingViewY = (int) (metrics.heightPixels * Float.parseFloat(initYSettings) - offset);
+            }
         }
 
         // Initial Animation
