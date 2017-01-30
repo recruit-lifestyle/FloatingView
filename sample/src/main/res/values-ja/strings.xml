@@ -12,4 +12,7 @@
     <string name="mail_address">example@example.com</string>
     <string name="mail_title">タイトル</string>
     <string name="mail_content">メッセージ</string>
+    <string name="touch_finished_position" formatted="false">現在位置 (%d,%d)</string>
+    <string name="deleted_soon">FloatingViewはまもなく消えます</string>
+    <string name="finish_deleted">FloatingViewは消えました</string>
 </resources>

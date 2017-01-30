@@ -122,6 +122,14 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onTouchFinished(boolean isFinishing, int x, int y) {
+        // No Tracking
+    }
+
+    /**
      * Viewを破棄します。
      */
     private void destroy() {

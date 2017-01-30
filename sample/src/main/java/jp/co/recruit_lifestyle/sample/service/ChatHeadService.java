@@ -96,6 +96,19 @@ public class ChatHeadService extends Service implements FloatingViewListener {
     @Override
     public void onFinishFloatingView() {
         stopSelf();
+        Log.d(TAG, getString(R.string.finish_deleted));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onTouchFinished(boolean isFinishing, int x, int y) {
+        if (isFinishing) {
+            Log.d(TAG, getString(R.string.deleted_soon));
+        } else {
+            Log.d(TAG, getString(R.string.touch_finished_position, x, y));
+        }
     }
 
     /**

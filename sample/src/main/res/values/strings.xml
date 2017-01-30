@@ -13,4 +13,7 @@
     <string name="mail_address">example@example.com</string>
     <string name="mail_title">Title</string>
     <string name="mail_content">Message</string>
+    <string name="touch_finished_position" formatted="false">Current position (%d,%d)</string>
+    <string name="deleted_soon">FloatingView will be deleted soon.</string>
+    <string name="finish_deleted">FloatingView has been deleted.</string>
 </resources>
