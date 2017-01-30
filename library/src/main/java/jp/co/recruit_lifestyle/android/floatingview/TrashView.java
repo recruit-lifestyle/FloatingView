@@ -28,6 +28,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.support.annotation.IntDef;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -39,6 +40,8 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 
 /**
@@ -83,6 +86,14 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
      * 背景・削除アイコンなどを即時に消すことを表す定数
      */
     static final int ANIMATION_FORCE_CLOSE = 3;
+
+    /**
+     * Animation State
+     */
+    @IntDef({ANIMATION_NONE, ANIMATION_OPEN, ANIMATION_CLOSE, ANIMATION_FORCE_CLOSE})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface AnimationState {
+    }
 
     /**
      * 長押し判定とする時間

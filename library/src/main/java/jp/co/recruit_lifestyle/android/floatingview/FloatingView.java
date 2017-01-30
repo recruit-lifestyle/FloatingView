@@ -27,6 +27,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -39,6 +40,8 @@ import android.view.WindowManager;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 
 /**
@@ -87,6 +90,14 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * 終了状態
      */
     static final int STATE_FINISHING = 2;
+
+    /**
+     * AnimationState
+     */
+    @IntDef({STATE_NORMAL, STATE_INTERSECTING, STATE_FINISHING})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface AnimationState {
+    }
 
     /**
      * 長押し判定とする時間(移動操作も考慮して通常の1.5倍)
@@ -1015,7 +1026,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
          *
          * @param newState STATE_NORMAL or STATE_INTERSECTING or STATE_FINISHING
          */
-        void setState(int newState) {
+        void setState(@AnimationState int newState) {
             // 状態が異なった場合のみ状態を変更フラグを変える
             if (mState != newState) {
                 mIsChangeState = true;

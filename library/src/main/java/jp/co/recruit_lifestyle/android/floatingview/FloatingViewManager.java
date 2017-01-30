@@ -19,12 +19,16 @@ package jp.co.recruit_lifestyle.android.floatingview;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.IntDef;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
 /**
@@ -50,6 +54,14 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
     public static final int DISPLAY_MODE_HIDE_FULLSCREEN = 3;
 
     /**
+     * 表示モード
+     */
+    @IntDef({DISPLAY_MODE_SHOW_ALWAYS, DISPLAY_MODE_HIDE_ALWAYS, DISPLAY_MODE_HIDE_FULLSCREEN})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DisplayMode {
+    }
+
+    /**
      * 左右の近い方向に移動
      */
     public static final int MOVE_DIRECTION_DEFAULT = 0;
@@ -65,6 +77,14 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      * 移動しない
      */
     public static final int MOVE_DIRECTION_NONE = 3;
+
+    /**
+     * Moving direction
+     */
+    @IntDef({MOVE_DIRECTION_DEFAULT, MOVE_DIRECTION_LEFT, MOVE_DIRECTION_RIGHT, MOVE_DIRECTION_NONE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MoveDirection {
+    }
 
     /**
      * Viewの形が円形の場合
@@ -125,6 +145,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
     /**
      * 現在の表示モード
      */
+    @DisplayMode
     private int mDisplayMode;
 
     /**
@@ -202,7 +223,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      * FloatingViewのタッチをロックします。
      */
     @Override
-    public void onTrashAnimationStarted(int animationCode) {
+    public void onTrashAnimationStarted(@TrashView.AnimationState int animationCode) {
         // クローズまたは強制クローズの場合はすべてのFloatingViewをタッチさせない
         if (animationCode == TrashView.ANIMATION_CLOSE || animationCode == TrashView.ANIMATION_FORCE_CLOSE) {
             final int size = mFloatingViewList.size();
@@ -217,7 +238,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      * FloatingViewのタッチロックの解除を行います。
      */
     @Override
-    public void onTrashAnimationEnd(int animationCode) {
+    public void onTrashAnimationEnd(@TrashView.AnimationState int animationCode) {
 
         final int state = mTargetFloatingView.getState();
         // 終了していたらViewを削除する
@@ -305,7 +326,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      *
      * @param resId drawable ID
      */
-    public void setFixedTrashIconImage(int resId) {
+    public void setFixedTrashIconImage(@DrawableRes int resId) {
         mTrashView.setFixedTrashIconImage(resId);
     }
 
@@ -314,7 +335,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      *
      * @param resId drawable ID
      */
-    public void setActionTrashIconImage(int resId) {
+    public void setActionTrashIconImage(@DrawableRes int resId) {
         mTrashView.setActionTrashIconImage(resId);
     }
 
@@ -339,9 +360,9 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
     /**
      * 表示モードを変更します。
      *
-     * @param displayMode DISPLAY_MODE_HIDE_ALWAYS or DISPLAY_MODE_HIDE_FULLSCREEN or DISPLAY_MODE_SHOW_ALWAYS
+     * @param displayMode {@link #DISPLAY_MODE_SHOW_ALWAYS} or {@link #DISPLAY_MODE_HIDE_ALWAYS} or {@link #DISPLAY_MODE_HIDE_FULLSCREEN}
      */
-    public void setDisplayMode(int displayMode) {
+    public void setDisplayMode(@DisplayMode int displayMode) {
         mDisplayMode = displayMode;
         // 常に表示/フルスクリーン時に非表示にするモードの場合
         if (mDisplayMode == DISPLAY_MODE_SHOW_ALWAYS || mDisplayMode == DISPLAY_MODE_HIDE_FULLSCREEN) {
@@ -488,6 +509,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
          * FloatingViewが吸着する方向
          * ※座標を指定すると自動的にMOVE_DIRECTION_NONEになります
          */
+        @MoveDirection
         public int moveDirection;
 
         /**
