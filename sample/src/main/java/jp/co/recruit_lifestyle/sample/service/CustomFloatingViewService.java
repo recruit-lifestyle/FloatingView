@@ -234,7 +234,6 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
             final int defaultY = options.floatingViewY;
             options.floatingViewX = sharedPref.getInt(PREF_KEY_LAST_POSITION_X, defaultX);
             options.floatingViewY = sharedPref.getInt(PREF_KEY_LAST_POSITION_Y, defaultY);
-            System.out.println("(" + options.floatingViewX + "," + options.floatingViewY + ")");
         } else {
             // Init X/Y
             final String initXSettings = sharedPref.getString("settings_init_x", "");
