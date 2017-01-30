@@ -12,7 +12,7 @@ To API Level 14 or later are supported
 [SimpleFloating](http://youtu.be/nb8M2p0agF4)
 
 ## Requirements
-Target Sdk Version : 24
+Target Sdk Version : 25
 Min Sdk Version : 14  
 
 ## How to use
@@ -25,7 +25,7 @@ Min Sdk Version : 14
   }
 
   dependencies {
-    compile 'com.github.recruit-lifestyle:FloatingView:2.0'
+    compile 'com.github.recruit-lifestyle:FloatingView:2.1'
   }
   ```
   
@@ -86,6 +86,10 @@ example)
     final Activity activity = getActivity();
     activity.startService(new Intent(activity, ChatHeadService.class));
 ```
+
+## Update in 2.1
+- Add `FloatingViewListener#onTouchFinished`.This method is called when the touch action is finished.
+
 
 ## Credits
 
