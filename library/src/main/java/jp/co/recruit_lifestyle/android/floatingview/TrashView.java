@@ -224,6 +224,7 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
 
         // 背景Viewの貼り付け
         final FrameLayout.LayoutParams backgroundParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (BACKGROUND_HEIGHT * mMetrics.density));
+        backgroundParams.gravity = Gravity.BOTTOM;
         mRootView.addView(mBackgroundView, backgroundParams);
         // アクションアイコンの貼り付け
         final FrameLayout.LayoutParams actionTrashIconParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
