@@ -26,6 +26,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -428,7 +429,12 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
                 return false;
             }
         });
+
+        // set FloatingView size
+        final FrameLayout.LayoutParams targetParams = new FrameLayout.LayoutParams(options.floatingViewWidth, options.floatingViewHeight);
+        view.setLayoutParams(targetParams);
         floatingView.addView(view);
+
         // 非表示モードの場合
         if (mDisplayMode == DISPLAY_MODE_HIDE_ALWAYS) {
             floatingView.setVisibility(View.GONE);
@@ -498,7 +504,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         public float shape;
 
         /**
-         * 画面外のはみ出しマージン
+         * 画面外のはみ出しマージン(px)
          */
         public int overMargin;
 
@@ -511,6 +517,16 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
          * 画面左下を原点とするFloatingViewのY座標
          */
         public int floatingViewY;
+
+        /**
+         * Width of FloatingView(px)
+         */
+        public int floatingViewWidth;
+
+        /**
+         * Height of FloatingView(px)
+         */
+        public int floatingViewHeight;
 
         /**
          * FloatingViewが吸着する方向
@@ -531,6 +547,8 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             shape = SHAPE_CIRCLE;
             overMargin = 0;
             floatingViewX = FloatingView.DEFAULT_X;
+            floatingViewWidth = FloatingView.DEFAULT_WIDTH;
+            floatingViewHeight = FloatingView.DEFAULT_HEIGHT;
             floatingViewY = FloatingView.DEFAULT_Y;
             moveDirection = MOVE_DIRECTION_DEFAULT;
             animateInitialMove = true;

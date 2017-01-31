@@ -115,6 +115,16 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     static final int DEFAULT_Y = Integer.MIN_VALUE;
 
     /**
+     * Default width size
+     */
+    static final int DEFAULT_WIDTH = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+    /**
+     * Default height size
+     */
+    static final int DEFAULT_HEIGHT = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+    /**
      * WindowManager
      */
     private final WindowManager mWindowManager;
