@@ -207,6 +207,7 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
         // 各種Viewの設定
         // TrashViewに直接貼り付けられるView（このViewを介さないと、削除Viewと背景Viewのレイアウトがなぜか崩れる）
         mRootView = new FrameLayout(context);
+        mRootView.setClipChildren(false);
         // 削除アイコンのルートView
         mTrashIconRootView = new FrameLayout(context);
         mFixedTrashIconView = new ImageView(context);
