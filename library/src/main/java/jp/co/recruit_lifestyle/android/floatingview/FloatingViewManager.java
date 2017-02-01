@@ -425,7 +425,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             @Override
             public boolean onPreDraw() {
                 floatingView.getViewTreeObserver().removeOnPreDrawListener(this);
-                mTrashView.calcActionTrashIconPadding(floatingView.getMeasuredWidth(), floatingView.getMeasuredHeight(), floatingView.getShape());
+                mTrashView.updateActionTrashIcon(floatingView.getMeasuredWidth(), floatingView.getMeasuredHeight(), floatingView.getShape());
                 return false;
             }
         });

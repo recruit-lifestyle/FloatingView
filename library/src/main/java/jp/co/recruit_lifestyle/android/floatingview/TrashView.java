@@ -326,13 +326,13 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
     }
 
     /**
-     * アクションする削除アイコンのパディングを設定します。
+     * アクションする削除アイコンの設定を更新します。
      *
      * @param width  対象となるViewの幅
      * @param height 対象となるViewの高さ
      * @param shape  対象となるViewの形状
      */
-    void calcActionTrashIconPadding(float width, float height, float shape) {
+    void updateActionTrashIcon(float width, float height, float shape) {
         // アクションする削除アイコンが設定されていない場合は何もしない
         if (!hasActionTrashIcon()) {
             return;
