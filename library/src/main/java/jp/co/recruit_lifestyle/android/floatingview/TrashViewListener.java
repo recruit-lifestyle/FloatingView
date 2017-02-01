@@ -23,6 +23,11 @@ package jp.co.recruit_lifestyle.android.floatingview;
 interface TrashViewListener {
 
     /**
+     * Require ActionTrashIcon updates.
+     */
+    void onUpdateActionTrashIcon();
+
+    /**
      * アニメーションを開始した時に通知されます。
      *
      * @param animationCode アニメーションコード

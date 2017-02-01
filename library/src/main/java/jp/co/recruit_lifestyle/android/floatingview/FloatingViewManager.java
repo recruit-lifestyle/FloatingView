@@ -24,7 +24,6 @@ import android.support.annotation.IntDef;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
@@ -218,6 +217,14 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             mTargetFloatingView.setFinishing();
             mTrashView.dismiss();
         }
+    }
+
+    /**
+     * Update ActionTrashIcon
+     */
+    @Override
+    public void onUpdateActionTrashIcon() {
+        mTrashView.updateActionTrashIcon(mTargetFloatingView.getMeasuredWidth(), mTargetFloatingView.getMeasuredHeight(), mTargetFloatingView.getShape());
     }
 
     /**
@@ -421,14 +428,6 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         floatingView.setOverMargin(options.overMargin);
         floatingView.setMoveDirection(options.moveDirection);
         floatingView.setAnimateInitialMove(options.animateInitialMove);
-        floatingView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                floatingView.getViewTreeObserver().removeOnPreDrawListener(this);
-                mTrashView.updateActionTrashIcon(floatingView.getMeasuredWidth(), floatingView.getMeasuredHeight(), floatingView.getShape());
-                return false;
-            }
-        });
 
         // set FloatingView size
         final FrameLayout.LayoutParams targetParams = new FrameLayout.LayoutParams(options.floatingViewWidth, options.floatingViewHeight);

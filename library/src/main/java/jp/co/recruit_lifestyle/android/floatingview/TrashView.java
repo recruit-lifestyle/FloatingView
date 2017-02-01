@@ -195,7 +195,7 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
 
         mParams = new WindowManager.LayoutParams();
         mParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
-        mParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        mParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
         mParams.type = WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
         mParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
@@ -210,6 +210,7 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
         mRootView.setClipChildren(false);
         // 削除アイコンのルートView
         mTrashIconRootView = new FrameLayout(context);
+        mTrashIconRootView.setClipChildren(false);
         mFixedTrashIconView = new ImageView(context);
         mActionTrashIconView = new ImageView(context);
         // 背景View
@@ -277,6 +278,15 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
     }
 
     /**
+     * initialize ActionTrashIcon
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mTrashViewListener.onUpdateActionTrashIcon();
+    }
+
+    /**
      * 画面サイズから自位置を決定します。
      */
     private void updateViewLayout() {
@@ -284,7 +294,8 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
         mParams.x = (mMetrics.widthPixels - getWidth()) / 2;
         mParams.y = 0;
 
-        // アニメーション側情報を更新
+        // Update view and layout
+        mTrashViewListener.onUpdateActionTrashIcon();
         mAnimationHandler.onUpdateViewLayout();
 
         mWindowManager.updateViewLayout(this, mParams);
@@ -351,11 +362,6 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
         mExitScaleAnimator = ObjectAnimator.ofPropertyValuesHolder(mActionTrashIconView, PropertyValuesHolder.ofFloat(ImageView.SCALE_X, 1.0f), PropertyValuesHolder.ofFloat(ImageView.SCALE_Y, 1.0f));
         mExitScaleAnimator.setInterpolator(new OvershootInterpolator());
         mExitScaleAnimator.setDuration(TRASH_ICON_SCALE_DURATION_MILLIS);
-
-        // 重なった際の拡大時にフィットするようにパディングの設定
-        final int horizontalPadding = Math.max((int) ((mActionTrashIconMaxScale - 1.0f) * mActionTrashIconBaseWidth / 2 + 0.5f), 0);
-        final int verticalPadding = Math.max((int) ((mActionTrashIconMaxScale - 1.0f) * mActionTrashIconBaseHeight / 2 + 0.5f), 0);
-        mActionTrashIconView.setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding);
     }
 
     /**
