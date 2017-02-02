@@ -778,6 +778,11 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
                     final float positionY = mTrashIconLimitPosition.bottom - stickyPositionY * mOvershootInterpolator.getInterpolation(translationYTimeRate);
                     trashIconRootView.setTranslationX(positionX);
                     trashIconRootView.setTranslationY(positionY);
+                    // clear drag view garbage
+                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                        clearClippedChildren(trashView.mRootView);
+                        clearClippedChildren(trashView.mTrashIconRootView);
+                    }
                 }
 
                 sendMessageAtTime(newMessage(animationCode, TYPE_UPDATE), SystemClock.uptimeMillis() + ANIMATION_REFRESH_TIME_MILLIS);
@@ -814,6 +819,15 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
                     listener.onTrashAnimationEnd(ANIMATION_FORCE_CLOSE);
                 }
             }
+        }
+
+        /**
+         * Clear the animation garbage of the target view.
+         */
+        private static void clearClippedChildren(ViewGroup viewGroup) {
+            viewGroup.setClipChildren(true);
+            viewGroup.invalidate();
+            viewGroup.setClipChildren(false);
         }
 
         /**
