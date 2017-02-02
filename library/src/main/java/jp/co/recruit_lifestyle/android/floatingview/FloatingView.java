@@ -299,7 +299,8 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        updateViewLayout();
+        final boolean isSizeChanged = w != oldw || h != oldh;
+        updateViewLayout(isSizeChanged);
     }
 
     /**
@@ -308,7 +309,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        updateViewLayout();
+        updateViewLayout(false);
     }
 
     /**
@@ -344,8 +345,10 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
 
     /**
      * 画面サイズから自位置を決定します。
+     *
+     * @param isSizeChanged If true, FloatingView has changed size
      */
-    private void updateViewLayout() {
+    private void updateViewLayout(boolean isSizeChanged) {
         cancelAnimation();
 
         // 前の画面座標を保存
@@ -365,8 +368,8 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         mMoveLimitRect.set(-width, -height * 2, newScreenWidth + width, newScreenHeight + height);
         mPositionLimitRect.set(-mOverMargin, 0, newScreenWidth - width + mOverMargin, newScreenHeight - mStatusBarHeight - height);
 
-        // 縦横切替の場合
-        if (oldScreenWidth != newScreenWidth || oldScreenHeight != newScreenHeight) {
+        // FloatingView size changed or device rotating
+        if (isSizeChanged || oldScreenWidth != newScreenWidth || oldScreenHeight != newScreenHeight) {
             // 画面端に移動する場合は現在の位置から左右端を設定
             if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_DEFAULT) {
                 // 右半分にある場合
