@@ -190,7 +190,12 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     /**
      * ステータスバーの高さ
      */
-    private final int mStatusBarHeight;
+    private final int mBaseStatusBarHeight;
+
+    /**
+     * Current status bar's height
+     */
+    private int mStatusBarHeight;
 
     /**
      * 左・右端に寄せるアニメーション
@@ -284,9 +289,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         final Resources resources = context.getResources();
         final int statusBarHeightId = resources.getIdentifier("status_bar_height", "dimen", "android");
         if (statusBarHeightId > 0) {
-            mStatusBarHeight = resources.getDimensionPixelSize(statusBarHeightId);
+            mBaseStatusBarHeight = resources.getDimensionPixelSize(statusBarHeightId);
+            mStatusBarHeight = mBaseStatusBarHeight;
         } else {
-            mStatusBarHeight = 0;
+            mBaseStatusBarHeight = 0;
+            mStatusBarHeight = mBaseStatusBarHeight;
         }
 
         // 初回描画処理用
@@ -341,6 +348,20 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         mIsDraggable = true;
         mWindowManager.updateViewLayout(this, mParams);
         return true;
+    }
+
+    /**
+     * Called when the layout of the system has changed.
+     *
+     * @param isFullscreen If true, the system is full screen
+     */
+    void onUpdateSystemLayout(boolean isFullscreen) {
+        if (isFullscreen) {
+            mStatusBarHeight = 0;
+        } else {
+            mStatusBarHeight = mBaseStatusBarHeight;
+        }
+        updateViewLayout(true);
     }
 
     /**

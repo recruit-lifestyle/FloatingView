@@ -196,6 +196,9 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      */
     @Override
     public void onScreenChanged(boolean isFullscreen) {
+        // update FloatingView layout
+        mTargetFloatingView.onUpdateSystemLayout(isFullscreen);
+
         // フルスクリーンでの非表示モードでない場合は何もしない
         if (mDisplayMode != DISPLAY_MODE_HIDE_FULLSCREEN) {
             return;
