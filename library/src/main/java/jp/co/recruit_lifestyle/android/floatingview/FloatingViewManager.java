@@ -19,6 +19,7 @@ package jp.co.recruit_lifestyle.android.floatingview;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IntDef;
 import android.view.HapticFeedbackConstants;
@@ -195,9 +196,18 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      * 画面がフルスクリーンになった場合はViewを非表示にします。
      */
     @Override
-    public void onScreenChanged(boolean isFullscreen) {
+    public void onScreenChanged(boolean isFitSystemWindow, int visibility) {
+        // detect status bar
+        boolean isHideStatusBar;
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+            // Support for screen rotation when setSystemUiVisibility is used
+            isHideStatusBar = isFitSystemWindow || (visibility & View.SYSTEM_UI_FLAG_LOW_PROFILE) == View.SYSTEM_UI_FLAG_LOW_PROFILE;
+        } else {
+            isHideStatusBar = isFitSystemWindow;
+        }
+
         // update FloatingView layout
-        mTargetFloatingView.onUpdateSystemLayout(isFullscreen);
+        mTargetFloatingView.onUpdateSystemLayout(isHideStatusBar);
 
         // フルスクリーンでの非表示モードでない場合は何もしない
         if (mDisplayMode != DISPLAY_MODE_HIDE_FULLSCREEN) {
@@ -211,7 +221,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             final int size = mFloatingViewList.size();
             for (int i = 0; i < size; i++) {
                 final FloatingView floatingView = mFloatingViewList.get(i);
-                floatingView.setVisibility(isFullscreen ? View.GONE : View.VISIBLE);
+                floatingView.setVisibility(isFitSystemWindow ? View.GONE : View.VISIBLE);
             }
             mTrashView.dismiss();
         }

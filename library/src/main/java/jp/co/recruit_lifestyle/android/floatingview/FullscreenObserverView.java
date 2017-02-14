@@ -106,7 +106,7 @@ class FullscreenObserverView extends View implements ViewTreeObserver.OnGlobalLa
         // View（フル画面）のサイズを取得
         if (mScreenChangedListener != null) {
             getWindowVisibleDisplayFrame(mWindowRect);
-            mScreenChangedListener.onScreenChanged(mLastUiVisibility != View.SYSTEM_UI_FLAG_VISIBLE || mWindowRect.top == 0);
+            mScreenChangedListener.onScreenChanged(mWindowRect.top == 0, mLastUiVisibility);
         }
     }
 
@@ -120,7 +120,7 @@ class FullscreenObserverView extends View implements ViewTreeObserver.OnGlobalLa
         // ナビゲーションバーの変化を受けて表示・非表示切替
         if (mScreenChangedListener != null) {
             getWindowVisibleDisplayFrame(mWindowRect);
-            mScreenChangedListener.onScreenChanged(mLastUiVisibility != View.SYSTEM_UI_FLAG_VISIBLE || mWindowRect.top == 0);
+            mScreenChangedListener.onScreenChanged(mWindowRect.top == 0, visibility);
         }
     }
 

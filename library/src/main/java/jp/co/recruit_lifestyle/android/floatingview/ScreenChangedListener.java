@@ -23,7 +23,8 @@ interface ScreenChangedListener {
     /**
      * スクリーンが変化した時に呼び出されます。
      *
-     * @param isFullscreen フルスクリーンの場合はtrue
+     * @param isFitSystemWindow If true, it fits the system window
+     * @param visibility        System UI Mode
      */
-    void onScreenChanged(boolean isFullscreen);
+    void onScreenChanged(boolean isFitSystemWindow, int visibility);
 }

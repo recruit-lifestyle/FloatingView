@@ -353,14 +353,10 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     /**
      * Called when the layout of the system has changed.
      *
-     * @param isFullscreen If true, the system is full screen
+     * @param isHideStatusBar If true, the status bar is hidden
      */
-    void onUpdateSystemLayout(boolean isFullscreen) {
-        if (isFullscreen) {
-            mStatusBarHeight = 0;
-        } else {
-            mStatusBarHeight = mBaseStatusBarHeight;
-        }
+    void onUpdateSystemLayout(boolean isHideStatusBar) {
+        mStatusBarHeight = isHideStatusBar ? 0 : mBaseStatusBarHeight;
         updateViewLayout(true);
     }
 
