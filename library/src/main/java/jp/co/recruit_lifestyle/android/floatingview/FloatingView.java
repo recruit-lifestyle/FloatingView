@@ -426,8 +426,8 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      */
     private void updateNavigationBarOffset(boolean isHideNavigationBar, boolean isPortrait) {
         if (!isHideNavigationBar) {
-            mNavigationBarHorizontalOffset = 0;
             mNavigationBarVerticalOffset = 0;
+            mNavigationBarHorizontalOffset = 0;
             return;
         }
 
