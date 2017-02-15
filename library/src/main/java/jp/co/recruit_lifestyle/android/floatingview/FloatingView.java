@@ -31,6 +31,8 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -198,6 +200,28 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private int mStatusBarHeight;
 
     /**
+     * Navigation bar's height(portlait)
+     */
+    private final int mBaseNavigationBarHeight;
+
+    /**
+     * Navigation bar's height
+     * Placed bottom on the screen(tablet)
+     * Or placed vertically on the screen(phone)
+     */
+    private final int mBaseNavigationBarRotatedHeight;
+
+    /**
+     * Current Navigation bar's vertical size
+     */
+    private int mNavigationBarVerticalOffset;
+
+    /**
+     * Current Navigation bar's horizontal size
+     */
+    private int mNavigationBarHorizontalOffset;
+
+    /**
      * 左・右端に寄せるアニメーション
      */
     private ValueAnimator mMoveEdgeAnimator;
@@ -258,6 +282,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private int mMoveDirection;
 
     /**
+     * If true, it's a tablet. If false, it's a phone
+     */
+    private final boolean mIsTablet;
+
+    /**
      * コンストラクタ
      *
      * @param context {@link android.content.Context}
@@ -281,24 +310,48 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         mLongPressHandler = new LongPressHandler(this);
         mMoveEdgeInterpolator = new OvershootInterpolator(MOVE_TO_EDGE_OVERSHOOT_TENSION);
         mMoveDirection = FloatingViewManager.MOVE_DIRECTION_DEFAULT;
+        final Resources resources = context.getResources();
+        mIsTablet = (resources.getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
 
         mMoveLimitRect = new Rect();
         mPositionLimitRect = new Rect();
 
         // ステータスバーの高さを取得
-        final Resources resources = context.getResources();
-        final int statusBarHeightId = resources.getIdentifier("status_bar_height", "dimen", "android");
-        if (statusBarHeightId > 0) {
-            mBaseStatusBarHeight = resources.getDimensionPixelSize(statusBarHeightId);
-            mStatusBarHeight = mBaseStatusBarHeight;
+        mBaseStatusBarHeight = getSystemUiDimensionPixelSize(resources, "status_bar_height");
+        mStatusBarHeight = mBaseStatusBarHeight;
+
+        // get navigation bar height
+        final boolean hasMenuKey = ViewConfiguration.get(context).hasPermanentMenuKey();
+        final boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
+        if (hasMenuKey || hasBackKey) {
+            mBaseNavigationBarHeight = 0;
+            mBaseNavigationBarRotatedHeight = 0;
         } else {
-            mBaseStatusBarHeight = 0;
-            mStatusBarHeight = mBaseStatusBarHeight;
+            mBaseNavigationBarHeight = getSystemUiDimensionPixelSize(resources, "navigation_bar_height");
+            final String resName = mIsTablet ? "navigation_bar_height_landscape" : "navigation_bar_width";
+            mBaseNavigationBarRotatedHeight = getSystemUiDimensionPixelSize(resources, resName);
         }
 
         // 初回描画処理用
         getViewTreeObserver().addOnPreDrawListener(this);
     }
+
+    /**
+     * Get the System ui dimension(pixel)
+     *
+     * @param resources {@link Resources}
+     * @param resName   dimension resource name
+     * @return pixel size
+     */
+    private static int getSystemUiDimensionPixelSize(Resources resources, String resName) {
+        int pixelSize = 0;
+        final int resId = resources.getIdentifier(resName, "dimen", "android");
+        if (resId > 0) {
+            pixelSize = resources.getDimensionPixelSize(resId);
+        }
+        return pixelSize;
+    }
+
 
     /**
      * 表示位置を決定します。
@@ -353,11 +406,47 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     /**
      * Called when the layout of the system has changed.
      *
-     * @param isHideStatusBar If true, the status bar is hidden
+     * @param isHideStatusBar     If true, the status bar is hidden
+     * @param isHideNavigationBar If true, the navigation bar is hidden
+     * @param isPortrait          If true, the device orientation is portrait
      */
-    void onUpdateSystemLayout(boolean isHideStatusBar) {
+    void onUpdateSystemLayout(boolean isHideStatusBar, boolean isHideNavigationBar, boolean isPortrait) {
+        // status bar
         mStatusBarHeight = isHideStatusBar ? 0 : mBaseStatusBarHeight;
+        // navigation bar
+        updateNavigationBarOffset(isHideNavigationBar, isPortrait);
         updateViewLayout(true);
+    }
+
+    /**
+     * Update offset of NavigationBar.
+     *
+     * @param isHideNavigationBar If true, the navigation bar is hidden
+     * @param isPortrait          If true, the device orientation is portrait
+     */
+    private void updateNavigationBarOffset(boolean isHideNavigationBar, boolean isPortrait) {
+        if (!isHideNavigationBar) {
+            mNavigationBarHorizontalOffset = 0;
+            mNavigationBarVerticalOffset = 0;
+            return;
+        }
+
+        // If the portrait, is displayed at the bottom of the screen
+        if (isPortrait) {
+            mNavigationBarVerticalOffset = mBaseNavigationBarHeight;
+            mNavigationBarHorizontalOffset = 0;
+            return;
+        }
+
+        // If it is a Tablet, it will appear at the bottom of the screen.
+        // If it is Phone, it will appear on the side of the screen
+        if (mIsTablet) {
+            mNavigationBarVerticalOffset = mBaseNavigationBarRotatedHeight;
+            mNavigationBarHorizontalOffset = 0;
+        } else {
+            mNavigationBarVerticalOffset = 0;
+            mNavigationBarHorizontalOffset = mBaseNavigationBarRotatedHeight;
+        }
     }
 
     /**
@@ -382,8 +471,8 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         final int newScreenHeight = mMetrics.heightPixels;
 
         // 移動範囲の設定
-        mMoveLimitRect.set(-width, -height * 2, newScreenWidth + width, newScreenHeight + height);
-        mPositionLimitRect.set(-mOverMargin, 0, newScreenWidth - width + mOverMargin, newScreenHeight - mStatusBarHeight - height);
+        mMoveLimitRect.set(-width, -height * 2, newScreenWidth + width + mNavigationBarHorizontalOffset, newScreenHeight + height + mNavigationBarVerticalOffset);
+        mPositionLimitRect.set(-mOverMargin, 0, newScreenWidth - width + mOverMargin + mNavigationBarHorizontalOffset, newScreenHeight - mStatusBarHeight - height + mNavigationBarVerticalOffset);
 
         // FloatingView size changed or device rotating
         if (isSizeChanged || oldScreenWidth != newScreenWidth || oldScreenHeight != newScreenHeight) {

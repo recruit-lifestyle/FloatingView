@@ -32,6 +32,11 @@ import android.view.WindowManager;
 class FullscreenObserverView extends View implements ViewTreeObserver.OnGlobalLayoutListener, View.OnSystemUiVisibilityChangeListener {
 
     /**
+     * Constant that mLastUiVisibility does not exist.
+     */
+    static final int NO_LAST_VISIBILITY = -1;
+
+    /**
      * WindowManager.LayoutParams
      */
     private final WindowManager.LayoutParams mParams;
@@ -73,6 +78,7 @@ class FullscreenObserverView extends View implements ViewTreeObserver.OnGlobalLa
         mParams.format = PixelFormat.TRANSLUCENT;
 
         mWindowRect = new Rect();
+        mLastUiVisibility = NO_LAST_VISIBILITY;
     }
 
     @Override
@@ -106,7 +112,7 @@ class FullscreenObserverView extends View implements ViewTreeObserver.OnGlobalLa
         // View（フル画面）のサイズを取得
         if (mScreenChangedListener != null) {
             getWindowVisibleDisplayFrame(mWindowRect);
-            mScreenChangedListener.onScreenChanged(mWindowRect.top == 0, mLastUiVisibility);
+            mScreenChangedListener.onScreenChanged(mWindowRect, mLastUiVisibility);
         }
     }
 
@@ -120,7 +126,7 @@ class FullscreenObserverView extends View implements ViewTreeObserver.OnGlobalLa
         // ナビゲーションバーの変化を受けて表示・非表示切替
         if (mScreenChangedListener != null) {
             getWindowVisibleDisplayFrame(mWindowRect);
-            mScreenChangedListener.onScreenChanged(mWindowRect.top == 0, visibility);
+            mScreenChangedListener.onScreenChanged(mWindowRect, visibility);
         }
     }
 

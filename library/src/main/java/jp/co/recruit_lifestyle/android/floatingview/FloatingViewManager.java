@@ -17,11 +17,14 @@
 package jp.co.recruit_lifestyle.android.floatingview;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IntDef;
+import android.util.DisplayMetrics;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
@@ -98,14 +101,21 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
     public static final float SHAPE_RECTANGLE = 1.4142f;
 
     /**
-     * Context
+     * {@link Context}
      */
     private final Context mContext;
+
+    /**
+     * {@link Resources}
+     */
+    private final Resources mResources;
 
     /**
      * WindowManager
      */
     private final WindowManager mWindowManager;
+
+    private final DisplayMetrics mDisplayMetrics;
 
     /**
      * 操作状態のFloatingView
@@ -163,7 +173,9 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      */
     public FloatingViewManager(Context context, FloatingViewListener listener) {
         mContext = context;
+        mResources = context.getResources();
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        mDisplayMetrics = new DisplayMetrics();
         mFloatingViewListener = listener;
         mFloatingViewRect = new Rect();
         mTrashViewRect = new Rect();
@@ -196,18 +208,30 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      * 画面がフルスクリーンになった場合はViewを非表示にします。
      */
     @Override
-    public void onScreenChanged(boolean isFitSystemWindow, int visibility) {
+    public void onScreenChanged(Rect windowRect, int visibility) {
         // detect status bar
+        final boolean isFitSystemWindowTop = windowRect.top == 0;
         boolean isHideStatusBar;
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 && visibility != FullscreenObserverView.NO_LAST_VISIBILITY) {
             // Support for screen rotation when setSystemUiVisibility is used
-            isHideStatusBar = isFitSystemWindow || (visibility & View.SYSTEM_UI_FLAG_LOW_PROFILE) == View.SYSTEM_UI_FLAG_LOW_PROFILE;
+            isHideStatusBar = isFitSystemWindowTop || (visibility & View.SYSTEM_UI_FLAG_LOW_PROFILE) == View.SYSTEM_UI_FLAG_LOW_PROFILE;
         } else {
-            isHideStatusBar = isFitSystemWindow;
+            isHideStatusBar = isFitSystemWindowTop;
         }
 
+        // detect navigation bar
+        final boolean isHideNavigationBar;
+        if (visibility == FullscreenObserverView.NO_LAST_VISIBILITY) {
+            // At the first it can not get the correct value, so do special processing
+            mWindowManager.getDefaultDisplay().getMetrics(mDisplayMetrics);
+            isHideNavigationBar = windowRect.width() - mDisplayMetrics.widthPixels > 0 || windowRect.height() - mDisplayMetrics.heightPixels > 0;
+        } else {
+            isHideNavigationBar = (visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+        }
+        final boolean isPortrait = mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+
         // update FloatingView layout
-        mTargetFloatingView.onUpdateSystemLayout(isHideStatusBar);
+        mTargetFloatingView.onUpdateSystemLayout(isHideStatusBar, isHideNavigationBar, isPortrait);
 
         // フルスクリーンでの非表示モードでない場合は何もしない
         if (mDisplayMode != DISPLAY_MODE_HIDE_FULLSCREEN) {
@@ -221,7 +245,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             final int size = mFloatingViewList.size();
             for (int i = 0; i < size; i++) {
                 final FloatingView floatingView = mFloatingViewList.get(i);
-                floatingView.setVisibility(isFitSystemWindow ? View.GONE : View.VISIBLE);
+                floatingView.setVisibility(isFitSystemWindowTop ? View.GONE : View.VISIBLE);
             }
             mTrashView.dismiss();
         }
