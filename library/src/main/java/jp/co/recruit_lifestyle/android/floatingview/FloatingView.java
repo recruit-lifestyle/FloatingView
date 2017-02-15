@@ -877,7 +877,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @return FloatingViewのY座標
      */
     private int getYByTouch() {
-        return (int) (mMetrics.heightPixels - (mScreenTouchY - mLocalTouchY + getHeight()));
+        return (int) (mMetrics.heightPixels + mNavigationBarVerticalOffset - (mScreenTouchY - mLocalTouchY + getHeight()));
     }
 
     /**
