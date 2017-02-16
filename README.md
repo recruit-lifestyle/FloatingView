@@ -12,7 +12,7 @@ To API Level 14 or later are supported
 [SimpleFloating](http://youtu.be/nb8M2p0agF4)
 
 ## Requirements
-Target Sdk Version : 25
+Target Sdk Version : 25  
 Min Sdk Version : 14  
 
 ## How to use
@@ -25,7 +25,7 @@ Min Sdk Version : 14
   }
 
   dependencies {
-    compile 'com.github.recruit-lifestyle:FloatingView:2.1'
+    compile 'com.github.recruit-lifestyle:FloatingView:2.2'
   }
   ```
   
@@ -53,9 +53,9 @@ public class ChatHeadService extends Service {
   mFloatingViewManager.addViewToWindow(iconView, options);
 ```  
 
-The second argument of FloatingViewManager is FloatingViewListener
+The second argument of `FloatingViewManager` is `FloatingViewListener`
   
-Describe the process (onFinishFloatingView) that is called when you exit the FloatingView
+Describe the process (`onFinishFloatingView`) that is called when you exit the FloatingView
 ```java
     @Override
     public void onFinishFloatingView() {
@@ -87,18 +87,61 @@ example)
     activity.startService(new Intent(activity, ChatHeadService.class));
 ```
 
+## Static Options
+It can be set only when displaying for the first time
+  
+example)
+```java
+final FloatingViewManager.Options options = new FloatingViewManager.Options();
+options.overMargin = (int) (16 * metrics.density);
+mFloatingViewManager.addViewToWindow(iconView, options);
+```
+
+|Option|Description|  
+|:-:|---|  
+|shape|`FloatingViewManager.SHAPE_CIRCLE`:Cicle(default)<br> `FloatingViewManager.SHAPE_RECTANGLE`:Rectangle|  
+|overMargin|Margin over the edge of the screen (px)<br>(default) 0|  
+|floatingViewX|X coordinate of initial display<br>(default) left side of display|  
+|floatingViewY|Y coordinate of initial display<br>(default) top of display|  
+|floatingViewWidth|FloatingView width<br>(default) The width of the layout added to FloatingView |  
+|floatingViewHeight|FloatingView height<br>(default) The height of the layout added to FloatingView|  
+|moveDirection|`FloatingViewManager.MOVE_DIRECTION_DEFAULT`:Left end or right end(default)<br> `FloatingViewManager.MOVE_DIRECTION_LEFT`:Left end<br>`FloatingViewManager.MOVE_DIRECTION_RIGHT`:Right end<br>`FloatingViewManager.MOVE_DIRECTION_NONE`:Not move|  
+|animateInitialMove|If true, animation when first displayed<br>(FloatingViewX, floatingViewY) to screen edge<br>Info: If `MOVE_DIRECTION_NONE` is set, nothing happens|  
+
+## Dynamic Options
+It can be set any time  
+  
+exapmle)
+```java
+mFloatingViewManager.setFixedTrashIconImage(R.drawable.ic_trash_fixed);
+mFloatingViewManager.setActionTrashIconImage(R.drawable.ic_trash_action);
+```
+
+|Option|Description|
+|:-:|---|
+|setFixedTrashIconImage|It is an icon that does *not* enlarge when FloatingView overlaps.|
+|setActionTrashIconImage|It is an icon that enlarge when FloatingView overlaps.|
+|setDisplayMode|`FloatingViewManager.DISPLAY_MODE_SHOW_ALWAYS`:Always show<br>`FloatingViewManager.DISPLAY_MODE_HIDE_ALWAYS`:Always hidden<br>`FloatingViewManager.DISPLAY_MODE_HIDE_FULLSCREEN`:It is hidden when in full screen|
+|setTrashViewEnabled|If false, the trash icon does not show during dragging.<br>(default) true|
+
+# Revisions
+## Update in 2.2
+- Support for large image for FloatingView (not complete, but almost works)([#16](../../issues/16))
+- Support size specification of FloatingView([#16](../../issues/16))
+- Fix issue [#14](../../issues/14)
+
 ## Update in 2.1
 - Add `FloatingViewListener#onTouchFinished`.This method is called when the touch action is finished.
 
 
-## Credits
+# Credits
 
 FloatingView is owned and maintained by [RECRUIT LIFESTYLE CO., LTD.](http://www.recruit-lifestyle.co.jp/)
 
 FloatingView was originally created by [Yoshihide Sogawa](https://twitter.com/egg_sogawa)  
 
 
-## License
+# License
 
     Copyright 2015 RECRUIT LIFESTYLE CO., LTD.
 
