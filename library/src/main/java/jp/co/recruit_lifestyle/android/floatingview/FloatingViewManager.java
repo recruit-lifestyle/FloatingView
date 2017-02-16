@@ -583,9 +583,9 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             shape = SHAPE_CIRCLE;
             overMargin = 0;
             floatingViewX = FloatingView.DEFAULT_X;
+            floatingViewY = FloatingView.DEFAULT_Y;
             floatingViewWidth = FloatingView.DEFAULT_WIDTH;
             floatingViewHeight = FloatingView.DEFAULT_HEIGHT;
-            floatingViewY = FloatingView.DEFAULT_Y;
             moveDirection = MOVE_DIRECTION_DEFAULT;
             animateInitialMove = true;
         }
