@@ -1,12 +1,12 @@
 /**
  * Copyright 2015 RECRUIT LIFESTYLE CO., LTD.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *            http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,15 +17,19 @@
 package jp.co.recruit_lifestyle.android.floatingview;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IntDef;
+import android.util.DisplayMetrics;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -97,14 +101,21 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
     public static final float SHAPE_RECTANGLE = 1.4142f;
 
     /**
-     * Context
+     * {@link Context}
      */
     private final Context mContext;
+
+    /**
+     * {@link Resources}
+     */
+    private final Resources mResources;
 
     /**
      * WindowManager
      */
     private final WindowManager mWindowManager;
+
+    private final DisplayMetrics mDisplayMetrics;
 
     /**
      * 操作状態のFloatingView
@@ -162,7 +173,9 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      */
     public FloatingViewManager(Context context, FloatingViewListener listener) {
         mContext = context;
+        mResources = context.getResources();
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        mDisplayMetrics = new DisplayMetrics();
         mFloatingViewListener = listener;
         mFloatingViewRect = new Rect();
         mTrashViewRect = new Rect();
@@ -195,7 +208,31 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      * 画面がフルスクリーンになった場合はViewを非表示にします。
      */
     @Override
-    public void onScreenChanged(boolean isFullscreen) {
+    public void onScreenChanged(Rect windowRect, int visibility) {
+        // detect status bar
+        final boolean isFitSystemWindowTop = windowRect.top == 0;
+        boolean isHideStatusBar;
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 && visibility != FullscreenObserverView.NO_LAST_VISIBILITY) {
+            // Support for screen rotation when setSystemUiVisibility is used
+            isHideStatusBar = isFitSystemWindowTop || (visibility & View.SYSTEM_UI_FLAG_LOW_PROFILE) == View.SYSTEM_UI_FLAG_LOW_PROFILE;
+        } else {
+            isHideStatusBar = isFitSystemWindowTop;
+        }
+
+        // detect navigation bar
+        final boolean isHideNavigationBar;
+        if (visibility == FullscreenObserverView.NO_LAST_VISIBILITY) {
+            // At the first it can not get the correct value, so do special processing
+            mWindowManager.getDefaultDisplay().getMetrics(mDisplayMetrics);
+            isHideNavigationBar = windowRect.width() - mDisplayMetrics.widthPixels > 0 || windowRect.height() - mDisplayMetrics.heightPixels > 0;
+        } else {
+            isHideNavigationBar = (visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+        }
+        final boolean isPortrait = mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+
+        // update FloatingView layout
+        mTargetFloatingView.onUpdateSystemLayout(isHideStatusBar, isHideNavigationBar, isPortrait);
+
         // フルスクリーンでの非表示モードでない場合は何もしない
         if (mDisplayMode != DISPLAY_MODE_HIDE_FULLSCREEN) {
             return;
@@ -208,7 +245,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             final int size = mFloatingViewList.size();
             for (int i = 0; i < size; i++) {
                 final FloatingView floatingView = mFloatingViewList.get(i);
-                floatingView.setVisibility(isFullscreen ? View.GONE : View.VISIBLE);
+                floatingView.setVisibility(isFitSystemWindowTop ? View.GONE : View.VISIBLE);
             }
             mTrashView.dismiss();
         }
@@ -217,6 +254,14 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             mTargetFloatingView.setFinishing();
             mTrashView.dismiss();
         }
+    }
+
+    /**
+     * Update ActionTrashIcon
+     */
+    @Override
+    public void onUpdateActionTrashIcon() {
+        mTrashView.updateActionTrashIcon(mTargetFloatingView.getMeasuredWidth(), mTargetFloatingView.getMeasuredHeight(), mTargetFloatingView.getShape());
     }
 
     /**
@@ -420,15 +465,12 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         floatingView.setOverMargin(options.overMargin);
         floatingView.setMoveDirection(options.moveDirection);
         floatingView.setAnimateInitialMove(options.animateInitialMove);
-        floatingView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                floatingView.getViewTreeObserver().removeOnPreDrawListener(this);
-                mTrashView.calcActionTrashIconPadding(floatingView.getMeasuredWidth(), floatingView.getMeasuredHeight(), floatingView.getShape());
-                return false;
-            }
-        });
+
+        // set FloatingView size
+        final FrameLayout.LayoutParams targetParams = new FrameLayout.LayoutParams(options.floatingViewWidth, options.floatingViewHeight);
+        view.setLayoutParams(targetParams);
         floatingView.addView(view);
+
         // 非表示モードの場合
         if (mDisplayMode == DISPLAY_MODE_HIDE_ALWAYS) {
             floatingView.setVisibility(View.GONE);
@@ -498,7 +540,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         public float shape;
 
         /**
-         * 画面外のはみ出しマージン
+         * 画面外のはみ出しマージン(px)
          */
         public int overMargin;
 
@@ -511,6 +553,16 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
          * 画面左下を原点とするFloatingViewのY座標
          */
         public int floatingViewY;
+
+        /**
+         * Width of FloatingView(px)
+         */
+        public int floatingViewWidth;
+
+        /**
+         * Height of FloatingView(px)
+         */
+        public int floatingViewHeight;
 
         /**
          * FloatingViewが吸着する方向
@@ -532,6 +584,8 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             overMargin = 0;
             floatingViewX = FloatingView.DEFAULT_X;
             floatingViewY = FloatingView.DEFAULT_Y;
+            floatingViewWidth = FloatingView.DEFAULT_WIDTH;
+            floatingViewHeight = FloatingView.DEFAULT_HEIGHT;
             moveDirection = MOVE_DIRECTION_DEFAULT;
             animateInitialMove = true;
         }

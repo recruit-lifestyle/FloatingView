@@ -1,12 +1,12 @@
 /**
  * Copyright 2015 RECRUIT LIFESTYLE CO., LTD.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *            http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,6 +31,8 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -115,6 +117,16 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     static final int DEFAULT_Y = Integer.MIN_VALUE;
 
     /**
+     * Default width size
+     */
+    static final int DEFAULT_WIDTH = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+    /**
+     * Default height size
+     */
+    static final int DEFAULT_HEIGHT = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+    /**
      * WindowManager
      */
     private final WindowManager mWindowManager;
@@ -180,7 +192,34 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     /**
      * ステータスバーの高さ
      */
-    private final int mStatusBarHeight;
+    private final int mBaseStatusBarHeight;
+
+    /**
+     * Current status bar's height
+     */
+    private int mStatusBarHeight;
+
+    /**
+     * Navigation bar's height(portlait)
+     */
+    private final int mBaseNavigationBarHeight;
+
+    /**
+     * Navigation bar's height
+     * Placed bottom on the screen(tablet)
+     * Or placed vertically on the screen(phone)
+     */
+    private final int mBaseNavigationBarRotatedHeight;
+
+    /**
+     * Current Navigation bar's vertical size
+     */
+    private int mNavigationBarVerticalOffset;
+
+    /**
+     * Current Navigation bar's horizontal size
+     */
+    private int mNavigationBarHorizontalOffset;
 
     /**
      * 左・右端に寄せるアニメーション
@@ -243,6 +282,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private int mMoveDirection;
 
     /**
+     * If true, it's a tablet. If false, it's a phone
+     */
+    private final boolean mIsTablet;
+
+    /**
      * コンストラクタ
      *
      * @param context {@link android.content.Context}
@@ -266,17 +310,26 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         mLongPressHandler = new LongPressHandler(this);
         mMoveEdgeInterpolator = new OvershootInterpolator(MOVE_TO_EDGE_OVERSHOOT_TENSION);
         mMoveDirection = FloatingViewManager.MOVE_DIRECTION_DEFAULT;
+        final Resources resources = context.getResources();
+        mIsTablet = (resources.getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
 
         mMoveLimitRect = new Rect();
         mPositionLimitRect = new Rect();
 
         // ステータスバーの高さを取得
-        final Resources resources = context.getResources();
-        final int statusBarHeightId = resources.getIdentifier("status_bar_height", "dimen", "android");
-        if (statusBarHeightId > 0) {
-            mStatusBarHeight = resources.getDimensionPixelSize(statusBarHeightId);
+        mBaseStatusBarHeight = getSystemUiDimensionPixelSize(resources, "status_bar_height");
+        mStatusBarHeight = mBaseStatusBarHeight;
+
+        // get navigation bar height
+        final boolean hasMenuKey = ViewConfiguration.get(context).hasPermanentMenuKey();
+        final boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
+        if (hasMenuKey || hasBackKey) {
+            mBaseNavigationBarHeight = 0;
+            mBaseNavigationBarRotatedHeight = 0;
         } else {
-            mStatusBarHeight = 0;
+            mBaseNavigationBarHeight = getSystemUiDimensionPixelSize(resources, "navigation_bar_height");
+            final String resName = mIsTablet ? "navigation_bar_height_landscape" : "navigation_bar_width";
+            mBaseNavigationBarRotatedHeight = getSystemUiDimensionPixelSize(resources, resName);
         }
 
         // 初回描画処理用
@@ -284,12 +337,30 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     }
 
     /**
+     * Get the System ui dimension(pixel)
+     *
+     * @param resources {@link Resources}
+     * @param resName   dimension resource name
+     * @return pixel size
+     */
+    private static int getSystemUiDimensionPixelSize(Resources resources, String resName) {
+        int pixelSize = 0;
+        final int resId = resources.getIdentifier(resName, "dimen", "android");
+        if (resId > 0) {
+            pixelSize = resources.getDimensionPixelSize(resId);
+        }
+        return pixelSize;
+    }
+
+
+    /**
      * 表示位置を決定します。
      */
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        updateViewLayout();
+        final boolean isSizeChanged = w != oldw || h != oldh;
+        updateViewLayout(isSizeChanged);
     }
 
     /**
@@ -298,7 +369,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        updateViewLayout();
+        updateViewLayout(false);
     }
 
     /**
@@ -333,9 +404,57 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     }
 
     /**
-     * 画面サイズから自位置を決定します。
+     * Called when the layout of the system has changed.
+     *
+     * @param isHideStatusBar     If true, the status bar is hidden
+     * @param isHideNavigationBar If true, the navigation bar is hidden
+     * @param isPortrait          If true, the device orientation is portrait
      */
-    private void updateViewLayout() {
+    void onUpdateSystemLayout(boolean isHideStatusBar, boolean isHideNavigationBar, boolean isPortrait) {
+        // status bar
+        mStatusBarHeight = isHideStatusBar ? 0 : mBaseStatusBarHeight;
+        // navigation bar
+        updateNavigationBarOffset(isHideNavigationBar, isPortrait);
+        updateViewLayout(true);
+    }
+
+    /**
+     * Update offset of NavigationBar.
+     *
+     * @param isHideNavigationBar If true, the navigation bar is hidden
+     * @param isPortrait          If true, the device orientation is portrait
+     */
+    private void updateNavigationBarOffset(boolean isHideNavigationBar, boolean isPortrait) {
+        if (!isHideNavigationBar) {
+            mNavigationBarVerticalOffset = 0;
+            mNavigationBarHorizontalOffset = 0;
+            return;
+        }
+
+        // If the portrait, is displayed at the bottom of the screen
+        if (isPortrait) {
+            mNavigationBarVerticalOffset = mBaseNavigationBarHeight;
+            mNavigationBarHorizontalOffset = 0;
+            return;
+        }
+
+        // If it is a Tablet, it will appear at the bottom of the screen.
+        // If it is Phone, it will appear on the side of the screen
+        if (mIsTablet) {
+            mNavigationBarVerticalOffset = mBaseNavigationBarRotatedHeight;
+            mNavigationBarHorizontalOffset = 0;
+        } else {
+            mNavigationBarVerticalOffset = 0;
+            mNavigationBarHorizontalOffset = mBaseNavigationBarRotatedHeight;
+        }
+    }
+
+    /**
+     * 画面サイズから自位置を決定します。
+     *
+     * @param isSizeChanged If true, FloatingView has changed size
+     */
+    private void updateViewLayout(boolean isSizeChanged) {
         cancelAnimation();
 
         // 前の画面座標を保存
@@ -352,11 +471,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         final int newScreenHeight = mMetrics.heightPixels;
 
         // 移動範囲の設定
-        mMoveLimitRect.set(-width, -height * 2, newScreenWidth + width, newScreenHeight + height);
-        mPositionLimitRect.set(-mOverMargin, 0, newScreenWidth - width + mOverMargin, newScreenHeight - mStatusBarHeight - height);
+        mMoveLimitRect.set(-width, -height * 2, newScreenWidth + width + mNavigationBarHorizontalOffset, newScreenHeight + height + mNavigationBarVerticalOffset);
+        mPositionLimitRect.set(-mOverMargin, 0, newScreenWidth - width + mOverMargin + mNavigationBarHorizontalOffset, newScreenHeight - mStatusBarHeight - height + mNavigationBarVerticalOffset);
 
-        // 縦横切替の場合
-        if (oldScreenWidth != newScreenWidth || oldScreenHeight != newScreenHeight) {
+        // FloatingView size changed or device rotating
+        if (isSizeChanged || oldScreenWidth != newScreenWidth || oldScreenHeight != newScreenHeight) {
             // 画面端に移動する場合は現在の位置から左右端を設定
             if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_DEFAULT) {
                 // 右半分にある場合
@@ -758,7 +877,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @return FloatingViewのY座標
      */
     private int getYByTouch() {
-        return (int) (mMetrics.heightPixels - (mScreenTouchY - mLocalTouchY + getHeight()));
+        return (int) (mMetrics.heightPixels + mNavigationBarVerticalOffset - (mScreenTouchY - mLocalTouchY + getHeight()));
     }
 
     /**
