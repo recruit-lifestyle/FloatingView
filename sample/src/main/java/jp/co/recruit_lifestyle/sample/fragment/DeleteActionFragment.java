@@ -2,25 +2,20 @@ package jp.co.recruit_lifestyle.sample.fragment;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
-import android.os.Build;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import jp.co.recruit.floatingview.R;
+import jp.co.recruit_lifestyle.sample.service.CustomFloatingViewService;
 
 
 /**
  * FloatingViewのサンプルサービスを削除するフラグメントです。
  */
 public class DeleteActionFragment extends Fragment {
-
-    /**
-     * DeleteActionCallback
-     */
-    private DeleteActionCallback mDeleteActionCallback;
 
     /**
      * DeleteActionFragmentを生成します。
@@ -42,42 +37,6 @@ public class DeleteActionFragment extends Fragment {
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("deprecation")
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            onAttachFragment(activity);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        onAttachFragment(context);
-    }
-
-    /**
-     * onAttach(Activity)のbackport用メソッド
-     * INFO:support v13を使用しているため現在はこの方法しかできない
-     *
-     * @param context Context
-     */
-    private void onAttachFragment(Context context) {
-        try {
-            mDeleteActionCallback = (DeleteActionCallback) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + " must implement " + DeleteActionCallback.class.toString());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_delete_action, container, false);
@@ -86,21 +45,11 @@ public class DeleteActionFragment extends Fragment {
         clearFloatingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mDeleteActionCallback.clearFloatingView();
+                // Easy way to delete a service
+                final Activity activity = getActivity();
+                activity.stopService(new Intent(activity, CustomFloatingViewService.class));
             }
         });
         return rootView;
-    }
-
-    /**
-     * 設定アクションのコールバックです。
-     */
-    public interface DeleteActionCallback {
-
-        /**
-         * デモ表示を削除します。
-         */
-        void clearFloatingView();
-
     }
 }

@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -19,8 +18,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import java.lang.ref.WeakReference;
-
 import jp.co.recruit.floatingview.R;
 import jp.co.recruit_lifestyle.android.floatingview.FloatingViewListener;
 import jp.co.recruit_lifestyle.android.floatingview.FloatingViewManager;
@@ -31,11 +28,6 @@ import jp.co.recruit_lifestyle.sample.DeleteActionActivity;
  * サンプルとしてクリック時にはメールアプリを起動します。
  */
 public class CustomFloatingViewService extends Service implements FloatingViewListener {
-
-    /**
-     * デバッグログ用のタグ
-     */
-    private static final String TAG = "CustomFloatingViewService";
 
     /**
      * 通知ID
@@ -51,11 +43,6 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
      * Prefs Key(Last position Y)
      */
     private static final String PREF_KEY_LAST_POSITION_Y = "last_position_y";
-
-    /**
-     * CustomFloatingViewServiceBinder
-     */
-    private IBinder mCustomFloatingViewServiceBinder;
 
     /**
      * FloatingViewManager
@@ -75,7 +62,6 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
         final DisplayMetrics metrics = new DisplayMetrics();
         final WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         windowManager.getDefaultDisplay().getMetrics(metrics);
-        mCustomFloatingViewServiceBinder = new CustomFloatingViewServiceBinder(this);
         final LayoutInflater inflater = LayoutInflater.from(this);
         final ImageView iconView = (ImageView) inflater.inflate(R.layout.widget_mail, null, false);
         iconView.setOnClickListener(new View.OnClickListener() {
@@ -120,7 +106,7 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return mCustomFloatingViewServiceBinder;
+        return null;
     }
 
     /**
@@ -251,34 +237,4 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
 
         return options;
     }
-
-    /**
-     * CustomFloatingServiceのBinderです。
-     */
-    public static class CustomFloatingViewServiceBinder extends Binder {
-
-        /**
-         * CustomFloatingViewService
-         */
-        private final WeakReference<CustomFloatingViewService> mService;
-
-        /**
-         * コンストラクタ
-         *
-         * @param service CustomFloatingViewService
-         */
-        CustomFloatingViewServiceBinder(CustomFloatingViewService service) {
-            mService = new WeakReference<>(service);
-        }
-
-        /**
-         * CustomFloatingViewServiceを取得します。
-         *
-         * @return CustomFloatingViewService
-         */
-        public CustomFloatingViewService getService() {
-            return mService.get();
-        }
-    }
-
 }
