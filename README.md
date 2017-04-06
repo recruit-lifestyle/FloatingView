@@ -99,7 +99,7 @@ mFloatingViewManager.addViewToWindow(iconView, options);
 
 |Option|Description|  
 |:-:|---|  
-|shape|`FloatingViewManager.SHAPE_CIRCLE`:Cicle(default)<br> `FloatingViewManager.SHAPE_RECTANGLE`:Rectangle|  
+|shape|`FloatingViewManager.SHAPE_CIRCLE`:Circle(default)<br> `FloatingViewManager.SHAPE_RECTANGLE`:Rectangle|  
 |overMargin|Margin over the edge of the screen (px)<br>(default) 0|  
 |floatingViewX|X coordinate of initial display<br>(default) left side of display|  
 |floatingViewY|Y coordinate of initial display<br>(default) top of display|  
@@ -111,7 +111,7 @@ mFloatingViewManager.addViewToWindow(iconView, options);
 ## Dynamic Options
 It can be set any time  
   
-exapmle)
+example)
 ```java
 mFloatingViewManager.setFixedTrashIconImage(R.drawable.ic_trash_fixed);
 mFloatingViewManager.setActionTrashIconImage(R.drawable.ic_trash_action);
