@@ -678,7 +678,9 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private void moveToEdge(int startX, int startY, boolean withAnimation) {
         //TODO:縦軸の速度も考慮して斜めに行くようにする
         // X・Y座標と移動方向を設定
-        final int goalPositionX;
+        int goalPositionX = startX;
+        int goalPositionY = startY;
+
         // 画面端に移動する場合は画面端の座標を設定
         if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_DEFAULT) {
             final boolean isMoveRightEdge = startX > (mMetrics.widthPixels - getWidth()) / 2;
@@ -691,13 +693,22 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         // 右端への移動
         else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_RIGHT) {
             goalPositionX = mPositionLimitRect.right;
+        } else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_NEAREST) {
+            int dist_top_bottom = Math.min(startY, mMetrics.heightPixels - startY);
+            int dist_left_right = Math.min(startX, mMetrics.widthPixels - startX);
+            if (dist_left_right < dist_top_bottom) {
+                final boolean isMoveRightEdge = startX > (mMetrics.widthPixels - getWidth()) / 2;
+                goalPositionX = isMoveRightEdge ? mPositionLimitRect.right : mPositionLimitRect.left;
+            } else {
+                final boolean isMoveTopEdge = startY < (mMetrics.heightPixels - getHeight()) / 2;
+                goalPositionY = isMoveTopEdge ? mPositionLimitRect.top : mPositionLimitRect.bottom;
+            }
         }
         // 画面端に移動しない場合は、現在の座標のまま
         else {
             goalPositionX = startX;
         }
         // TODO:Y座標もアニメーションさせる
-        final int goalPositionY = startY;
         // 指定座標に移動
         moveTo(startX, startY, goalPositionX, goalPositionY, withAnimation);
     }
@@ -719,16 +730,27 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         // アニメーションを行う場合
         if (withAnimation) {
             // TODO:Y座標もアニメーションさせる
-            mParams.y = goalPositionY;
 
-            mMoveEdgeAnimator = ValueAnimator.ofInt(currentX, goalPositionX);
-            mMoveEdgeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    mParams.x = (Integer) animation.getAnimatedValue();
-                    mWindowManager.updateViewLayout(FloatingView.this, mParams);
-                }
-            });
+            //to move only y-coord
+            if (goalPositionX == currentX) {
+                mMoveEdgeAnimator = ValueAnimator.ofInt(currentY, goalPositionY);
+                mMoveEdgeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        mParams.y = (Integer) animation.getAnimatedValue();
+                        mWindowManager.updateViewLayout(FloatingView.this, mParams);
+                    }
+                });
+            } else { // to move only x coord (to left or right)
+                mMoveEdgeAnimator = ValueAnimator.ofInt(currentX, goalPositionX);
+                mMoveEdgeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        mParams.x = (Integer) animation.getAnimatedValue();
+                        mWindowManager.updateViewLayout(FloatingView.this, mParams);
+                    }
+                });
+            }
             // X軸のアニメーション設定
             mMoveEdgeAnimator.setDuration(MOVE_TO_EDGE_DURATION);
             mMoveEdgeAnimator.setInterpolator(mMoveEdgeInterpolator);

@@ -77,15 +77,21 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      * 常に右に移動
      */
     public static final int MOVE_DIRECTION_RIGHT = 2;
+
+    /**
+     * 側に近づく方向に移動します
+     */
+    public static final int MOVE_DIRECTION_NEAREST = 3;
+
     /**
      * 移動しない
      */
-    public static final int MOVE_DIRECTION_NONE = 3;
+    public static final int MOVE_DIRECTION_NONE = 4;
 
     /**
      * Moving direction
      */
-    @IntDef({MOVE_DIRECTION_DEFAULT, MOVE_DIRECTION_LEFT, MOVE_DIRECTION_RIGHT, MOVE_DIRECTION_NONE})
+    @IntDef({MOVE_DIRECTION_DEFAULT, MOVE_DIRECTION_LEFT, MOVE_DIRECTION_RIGHT, MOVE_DIRECTION_NEAREST, MOVE_DIRECTION_NONE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface MoveDirection {
     }
