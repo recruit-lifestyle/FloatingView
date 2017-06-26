@@ -72,7 +72,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     /**
      * 画面端移動アニメーションの時間
      */
-    private static final long MOVE_TO_EDGE_DURATION = 4500L;
+    private static final long MOVE_TO_EDGE_DURATION = 450L;
 
     /**
      * 画面端移動アニメーションの係数
