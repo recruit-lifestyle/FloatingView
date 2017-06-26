@@ -24,9 +24,10 @@
     </string-array>
 
     <string-array name="settings_entries_move_direction">
-        <item>デフォルト(画面端に近い方)</item>
+        <item>デフォルト(画面左右端の近い方)</item>
         <item>左のみ</item>
         <item>右のみ</item>
+        <item>上下左右端の近い方</item>
         <item>吸着しない</item>
     </string-array>
 
