@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -209,6 +210,8 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
             options.moveDirection = FloatingViewManager.MOVE_DIRECTION_LEFT;
         } else if ("Right".equals(moveDirectionSettings)) {
             options.moveDirection = FloatingViewManager.MOVE_DIRECTION_RIGHT;
+        } else if ("Nearest".equals(moveDirectionSettings)) {
+            options.moveDirection = FloatingViewManager.MOVE_DIRECTION_NEAREST;
         } else if ("Fix".equals(moveDirectionSettings)) {
             options.moveDirection = FloatingViewManager.MOVE_DIRECTION_NONE;
         }

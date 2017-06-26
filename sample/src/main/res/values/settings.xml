@@ -55,6 +55,7 @@
         <item>Default</item>
         <item>Left only</item>
         <item>Right only</item>
+        <item>Nearest edge</item>
         <item>Fix</item>
     </string-array>
 
@@ -62,6 +63,7 @@
         <item>Default</item>
         <item>Left</item>
         <item>Right</item>
+        <item>Nearest</item>
         <item>Fix</item>
     </string-array>
 
