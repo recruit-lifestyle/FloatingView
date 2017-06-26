@@ -1052,7 +1052,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         @Override
         public void handleMessage(Message msg) {
             final FloatingView floatingView = mFloatingView.get();
-            if (floatingView == null || !ViewCompat.isAttachedToWindow(floatingView)) {
+            if (floatingView == null) {
                 removeMessages(ANIMATION_IN_TOUCH);
                 return;
             }
@@ -1060,7 +1060,6 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             final int animationCode = msg.what;
             final int animationType = msg.arg1;
             final WindowManager.LayoutParams params = floatingView.mParams;
-            final WindowManager windowManager = floatingView.mWindowManager;
 
             // 状態変更またはアニメーションを開始した場合の初期化
             if (mIsChangeState || animationType == TYPE_FIRST) {
@@ -1085,7 +1084,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
                 final float targetPositionY = Math.min(Math.max(moveLimitRect.top, (int) mTouchPositionY), moveLimitRect.bottom);
                 params.x = (int) (mStartX + (targetPositionX - mStartX) * basePosition);
                 params.y = (int) (mStartY + (targetPositionY - mStartY) * basePosition);
-                windowManager.updateViewLayout(floatingView, params);
+                floatingView.updateViewLayout();
                 sendMessageAtTime(newMessage(animationCode, TYPE_UPDATE), SystemClock.uptimeMillis() + ANIMATION_REFRESH_TIME_MILLIS);
             }
             // 重なった場合のアニメーション
@@ -1097,7 +1096,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
                 // 現在地からの移動
                 params.x = (int) (mStartX + (targetPositionX - mStartX) * basePosition);
                 params.y = (int) (mStartY + (targetPositionY - mStartY) * basePosition);
-                windowManager.updateViewLayout(floatingView, params);
+                floatingView.updateViewLayout();
                 sendMessageAtTime(newMessage(animationCode, TYPE_UPDATE), SystemClock.uptimeMillis() + ANIMATION_REFRESH_TIME_MILLIS);
             }
 
