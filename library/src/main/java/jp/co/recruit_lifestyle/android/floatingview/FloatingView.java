@@ -744,7 +744,9 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
                         mWindowManager.updateViewLayout(FloatingView.this, mParams);
                     }
                 });
-            } else { // to move only x coord (to left or right)
+            } else {
+                // to move only x coord (to left or right)
+                mParams.y = goalPositionY;
                 mMoveEdgeAnimator = ValueAnimator.ofInt(currentX, goalPositionX);
                 mMoveEdgeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
