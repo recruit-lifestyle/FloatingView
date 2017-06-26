@@ -400,7 +400,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             moveToEdge(mInitX, mInitY, mAnimateInitialMove);
         }
         mIsDraggable = true;
-        mWindowManager.updateViewLayout(this, mParams);
+        updateViewLayout();
         return true;
     }
 
@@ -505,7 +505,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             // スクリーン位置の比率からY座標を設定(四捨五入)
             final int newY = (int) (mParams.y * mPositionLimitRect.height() / (float) oldPositionLimitHeight + 0.5f);
             mParams.y = Math.min(Math.max(mPositionLimitRect.top, newY), mPositionLimitRect.bottom);
-            mWindowManager.updateViewLayout(this, mParams);
+            updateViewLayout();
         }
 
     }
@@ -741,7 +741,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
                         mParams.y = (Integer) animation.getAnimatedValue();
-                        mWindowManager.updateViewLayout(FloatingView.this, mParams);
+                        updateViewLayout();
                     }
                 });
             } else {
@@ -752,7 +752,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
                         mParams.x = (Integer) animation.getAnimatedValue();
-                        mWindowManager.updateViewLayout(FloatingView.this, mParams);
+                        updateViewLayout();
                     }
                 });
             }
@@ -765,7 +765,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             if (mParams.x != goalPositionX || mParams.y != goalPositionY) {
                 mParams.x = goalPositionX;
                 mParams.y = goalPositionY;
-                mWindowManager.updateViewLayout(FloatingView.this, mParams);
+                updateViewLayout();
             }
         }
         // タッチ座標を初期化
@@ -774,6 +774,16 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         mScreenTouchDownX = 0;
         mScreenTouchDownY = 0;
         mIsMoveAccept = false;
+    }
+
+    /**
+     * Check if it is attached to the Window and call WindowManager.updateLayout()
+     */
+    private void updateViewLayout() {
+        if (!ViewCompat.isAttachedToWindow(this)) {
+            return;
+        }
+        mWindowManager.updateViewLayout(this, mParams);
     }
 
     /**
