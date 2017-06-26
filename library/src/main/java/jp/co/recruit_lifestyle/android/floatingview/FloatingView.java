@@ -29,6 +29,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
+import android.support.v4.view.ViewCompat;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyCharacterMap;
@@ -1037,7 +1038,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         @Override
         public void handleMessage(Message msg) {
             final FloatingView floatingView = mFloatingView.get();
-            if (floatingView == null) {
+            if (floatingView == null || !ViewCompat.isAttachedToWindow(floatingView)) {
                 removeMessages(ANIMATION_IN_TOUCH);
                 return;
             }
