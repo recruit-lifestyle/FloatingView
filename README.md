@@ -25,7 +25,7 @@ Min Sdk Version : 14
   }
 
   dependencies {
-    compile 'com.github.recruit-lifestyle:FloatingView:2.2'
+    compile 'com.github.recruit-lifestyle:FloatingView:2.2.2'
   }
   ```
   
@@ -123,19 +123,6 @@ mFloatingViewManager.setActionTrashIconImage(R.drawable.ic_trash_action);
 |setActionTrashIconImage|It is an icon that enlarge when FloatingView overlaps.|
 |setDisplayMode|`FloatingViewManager.DISPLAY_MODE_SHOW_ALWAYS`:Always show<br>`FloatingViewManager.DISPLAY_MODE_HIDE_ALWAYS`:Always hidden<br>`FloatingViewManager.DISPLAY_MODE_HIDE_FULLSCREEN`:It is hidden when in full screen|
 |setTrashViewEnabled|If false, the trash icon does not show during dragging.<br>(default) true|
-
-# Revisions
-## Update in 2.2.1
-Minor update(sample module only)
-- Change the way to stop the service
-## Update in 2.2
-- Support for large image for FloatingView (not complete, but almost works)([#16](../../issues/16))
-- Support size specification of FloatingView([#16](../../issues/16))
-- Fix issue [#14](../../issues/14)
-
-## Update in 2.1
-- Add `FloatingViewListener#onTouchFinished`.This method is called when the touch action is finished.
-
 
 # Credits
 
