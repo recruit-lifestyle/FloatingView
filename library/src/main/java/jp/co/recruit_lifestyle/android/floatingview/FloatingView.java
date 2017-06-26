@@ -477,8 +477,8 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
 
         // FloatingView size changed or device rotating
         if (isSizeChanged || oldScreenWidth != newScreenWidth || oldScreenHeight != newScreenHeight) {
-            // 画面端に移動する場合は現在の位置から左右端を設定
-            if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_DEFAULT) {
+            // 画面端に移動する場合は現在の位置から左右端を設定(TODO:#41のバグ修正までデフォルトの処理に合わせる)
+            if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_DEFAULT || mMoveDirection == FloatingViewManager.MOVE_DIRECTION_NEAREST) {
                 // 右半分にある場合
                 if (mParams.x > (newScreenWidth - width) / 2) {
                     mParams.x = mPositionLimitRect.right;
@@ -694,10 +694,12 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         // 右端への移動
         else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_RIGHT) {
             goalPositionX = mPositionLimitRect.right;
-        } else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_NEAREST) {
-            int dist_top_bottom = Math.min(startY, mMetrics.heightPixels - startY);
-            int dist_left_right = Math.min(startX, mMetrics.widthPixels - startX);
-            if (dist_left_right < dist_top_bottom) {
+        }
+        // 上下左右端に移動
+        else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_NEAREST) {
+            final int distLeftRight = Math.min(startX, mPositionLimitRect.width() - startX);
+            final int distTopBottom = Math.min(startY, mPositionLimitRect.height() - startY);
+            if (distLeftRight < distTopBottom) {
                 final boolean isMoveRightEdge = startX > (mMetrics.widthPixels - getWidth()) / 2;
                 goalPositionX = isMoveRightEdge ? mPositionLimitRect.right : mPositionLimitRect.left;
             } else {
