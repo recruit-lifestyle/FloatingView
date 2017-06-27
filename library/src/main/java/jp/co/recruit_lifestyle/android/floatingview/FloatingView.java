@@ -468,6 +468,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         cancelAnimation();
 
         // 前の画面座標を保存
+        final int oldPositionLimitWidth = mPositionLimitRect.width();
         final int oldPositionLimitHeight = mPositionLimitRect.height();
 
         // 新しい座標情報に切替
@@ -491,7 +492,8 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         if (mIsInitialAnimationRunning && mRotation == newRotation) {
             moveToEdge(mParams.x, mParams.y, true);
         } else {
-            final int goalPositionX = getGoalPositionX(mParams.x, mParams.y);
+            final int newX = (int) (mParams.x * mPositionLimitRect.width() / (float) oldPositionLimitWidth + 0.5f);
+            final int goalPositionX = Math.min(Math.max(mPositionLimitRect.left, newX), mPositionLimitRect.right);
             final int newY = (int) (mParams.y * mPositionLimitRect.height() / (float) oldPositionLimitHeight + 0.5f);
             final int goalPositionY = Math.min(Math.max(mPositionLimitRect.top, newY), mPositionLimitRect.bottom);
             moveTo(mParams.x, mParams.y, goalPositionX, goalPositionY, false);
