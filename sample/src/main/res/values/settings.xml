@@ -4,6 +4,8 @@
     <string name="settings_title_display_mode">Display Mode</string>
     <string name="settings_title_margin">Margin</string>
     <string name="settings_title_move_direction">Move direction</string>
+    <string name="settings_title_use_physics">Use physics</string>
+    <string name="settings_summary_use_physics">Use dynamic physics-based animation when throwing</string>
     <string name="settings_title_save_position">Save the last position</string>>
     <string name="settings_summary_save_position">Ignore the initial position of X, Y coordinates
     </string>

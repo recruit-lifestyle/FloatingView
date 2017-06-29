@@ -475,6 +475,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         floatingView.setShape(options.shape);
         floatingView.setOverMargin(options.overMargin);
         floatingView.setMoveDirection(options.moveDirection);
+        floatingView.usePhysics(options.usePhysics);
         floatingView.setAnimateInitialMove(options.animateInitialMove);
 
         // set FloatingView size
@@ -581,6 +582,11 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
          */
         @MoveDirection
         public int moveDirection;
+
+        /**
+         * Use of physics-based animations or (default) ValueAnimation
+         */
+        public boolean usePhysics;
 
         /**
          * 初期表示時にアニメーションするフラグ

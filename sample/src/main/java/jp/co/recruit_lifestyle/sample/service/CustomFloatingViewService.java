@@ -13,7 +13,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -215,6 +214,8 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
         } else if ("Fix".equals(moveDirectionSettings)) {
             options.moveDirection = FloatingViewManager.MOVE_DIRECTION_NONE;
         }
+
+        options.usePhysics = sharedPref.getBoolean("settings_use_physics", false);
 
         // Last position
         final boolean isUseLastPosition = sharedPref.getBoolean("settings_save_last_position", false);
