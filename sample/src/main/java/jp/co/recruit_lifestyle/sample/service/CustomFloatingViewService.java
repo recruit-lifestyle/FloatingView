@@ -213,6 +213,8 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
             options.moveDirection = FloatingViewManager.MOVE_DIRECTION_NEAREST;
         } else if ("Fix".equals(moveDirectionSettings)) {
             options.moveDirection = FloatingViewManager.MOVE_DIRECTION_NONE;
+        } else if ("Thrown".equals(moveDirectionSettings)) {
+            options.moveDirection = FloatingViewManager.MOVE_DIRECTION_THROWN;
         }
 
         options.usePhysics = sharedPref.getBoolean("settings_use_physics", false);

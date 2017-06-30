@@ -89,11 +89,17 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      */
     public static final int MOVE_DIRECTION_NEAREST = 4;
 
+    /**
+     * Goes in the direction in which it is thrown
+     */
+    public static final int MOVE_DIRECTION_THROWN = 5;
+
 
     /**
      * Moving direction
      */
-    @IntDef({MOVE_DIRECTION_DEFAULT, MOVE_DIRECTION_LEFT, MOVE_DIRECTION_RIGHT, MOVE_DIRECTION_NEAREST, MOVE_DIRECTION_NONE})
+    @IntDef({MOVE_DIRECTION_DEFAULT, MOVE_DIRECTION_LEFT, MOVE_DIRECTION_RIGHT,
+            MOVE_DIRECTION_NEAREST, MOVE_DIRECTION_NONE, MOVE_DIRECTION_THROWN})
     @Retention(RetentionPolicy.SOURCE)
     public @interface MoveDirection {
     }

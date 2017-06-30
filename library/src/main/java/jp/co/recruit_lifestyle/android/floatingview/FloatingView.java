@@ -745,6 +745,16 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
                 final boolean isMoveTopEdge = startY < (mMetrics.heightPixels - getHeight()) / 2;
                 goalPositionY = isMoveTopEdge ? mPositionLimitRect.top : mPositionLimitRect.bottom;
             }
+        } else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_THROWN) {
+            float minVelocity = ViewConfiguration.get(getContext()).getScaledMaximumFlingVelocity() / 9;
+            if (mVelocityTracker != null && mVelocityTracker.getXVelocity() > minVelocity)
+                goalPositionX = mPositionLimitRect.right;
+            else if (mVelocityTracker != null && mVelocityTracker.getXVelocity() < -minVelocity)
+                goalPositionX = mPositionLimitRect.left;
+            else {
+                final boolean isMoveRightEdge = startX > (mMetrics.widthPixels - getWidth()) / 2;
+                goalPositionX = isMoveRightEdge ? mPositionLimitRect.right : mPositionLimitRect.left;
+            }
         }
         // 画面端に移動しない場合は、現在の座標のまま
         else {
