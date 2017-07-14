@@ -124,6 +124,9 @@ mFloatingViewManager.setActionTrashIconImage(R.drawable.ic_trash_action);
 |setDisplayMode|`FloatingViewManager.DISPLAY_MODE_SHOW_ALWAYS`:Always show<br>`FloatingViewManager.DISPLAY_MODE_HIDE_ALWAYS`:Always hidden<br>`FloatingViewManager.DISPLAY_MODE_HIDE_FULLSCREEN`:It is hidden when in full screen|
 |setTrashViewEnabled|If false, the trash icon does not show during dragging.<br>(default) true|
 
+# Known Issues
+* Sometimes calling`mFloatingViewManager.removeAllViewToWindow();` cause <b>IllegalArgumentException</b>. To resolve this issue use <a href="https://github.com/recruit-lifestyle/FloatingView/releases/tag/2.2.2-beta1">ver2.2.2-beta1</a>
+
 # Credits
 
 FloatingView is owned and maintained by [RECRUIT LIFESTYLE CO., LTD.](http://www.recruit-lifestyle.co.jp/)
