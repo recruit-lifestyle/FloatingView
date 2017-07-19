@@ -492,11 +492,16 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         if (mIsInitialAnimationRunning && mRotation == newRotation) {
             moveToEdge(mParams.x, mParams.y, true);
         } else {
-            final int newX = (int) (mParams.x * mPositionLimitRect.width() / (float) oldPositionLimitWidth + 0.5f);
-            final int goalPositionX = Math.min(Math.max(mPositionLimitRect.left, newX), mPositionLimitRect.right);
-            final int newY = (int) (mParams.y * mPositionLimitRect.height() / (float) oldPositionLimitHeight + 0.5f);
-            final int goalPositionY = Math.min(Math.max(mPositionLimitRect.top, newY), mPositionLimitRect.bottom);
-            moveTo(mParams.x, mParams.y, goalPositionX, goalPositionY, false);
+            // If there is a screen change during the operation, move to the appropriate position
+            if (mIsMoveAccept) {
+                moveToEdge(mParams.x, mParams.y, false);
+            } else {
+                final int newX = (int) (mParams.x * mPositionLimitRect.width() / (float) oldPositionLimitWidth + 0.5f);
+                final int goalPositionX = Math.min(Math.max(mPositionLimitRect.left, newX), mPositionLimitRect.right);
+                final int newY = (int) (mParams.y * mPositionLimitRect.height() / (float) oldPositionLimitHeight + 0.5f);
+                final int goalPositionY = Math.min(Math.max(mPositionLimitRect.top, newY), mPositionLimitRect.bottom);
+                moveTo(mParams.x, mParams.y, goalPositionX, goalPositionY, false);
+            }
         }
         mRotation = newRotation;
     }
