@@ -638,7 +638,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             // 画面から消す時は長押しをキャンセルし、画面端に強制的に移動します。
             cancelLongPress();
             setScale(SCALE_NORMAL);
-            if (mIsMoveAccept && mAnimationHandler.getState() != STATE_FINISHING) {
+            if (mIsMoveAccept) {
                 moveToEdge(false);
             }
             mAnimationHandler.removeMessages(FloatingAnimationHandler.ANIMATION_IN_TOUCH);
@@ -977,6 +977,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      */
     void setFinishing() {
         mAnimationHandler.setState(STATE_FINISHING);
+        mIsMoveAccept = false;
         setVisibility(View.GONE);
     }
 
