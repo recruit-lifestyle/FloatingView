@@ -531,6 +531,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         mScreenTouchX = event.getRawX();
         mScreenTouchY = event.getRawY();
         final int action = event.getAction();
+        boolean isWaitForMoveToEdge = false;
         // 押下
         if (action == MotionEvent.ACTION_DOWN) {
             // アニメーションのキャンセル
@@ -596,14 +597,20 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
                     getChildAt(i).performClick();
                 }
             } else {
-                // include device rotation
-                moveToEdge(true);
+                // Make a move after checking whether it is finished or not
+                isWaitForMoveToEdge = true;
             }
         }
 
         // タッチリスナを通知
         if (mOnTouchListener != null) {
             mOnTouchListener.onTouch(this, event);
+        }
+
+        //
+        if (isWaitForMoveToEdge && mAnimationHandler.getState() != STATE_FINISHING) {
+            // include device rotation
+            moveToEdge(true);
         }
 
         return true;
