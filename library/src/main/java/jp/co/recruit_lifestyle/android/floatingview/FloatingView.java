@@ -607,7 +607,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             mOnTouchListener.onTouch(this, event);
         }
 
-        //
+        // Lazy execution of moveToEdge
         if (isWaitForMoveToEdge && mAnimationHandler.getState() != STATE_FINISHING) {
             // include device rotation
             moveToEdge(true);

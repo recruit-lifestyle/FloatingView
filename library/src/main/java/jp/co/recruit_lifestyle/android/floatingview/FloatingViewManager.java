@@ -122,6 +122,9 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      */
     private final WindowManager mWindowManager;
 
+    /**
+     * {@link DisplayMetrics}
+     */
     private final DisplayMetrics mDisplayMetrics;
 
     /**
