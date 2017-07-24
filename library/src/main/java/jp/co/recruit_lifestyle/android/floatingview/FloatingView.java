@@ -532,6 +532,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             return true;
         }
 
+        // Block while initial display animation is running
+        if (mIsInitialAnimationRunning) {
+            return true;
+        }
+
         // 現在位置のキャッシュ
         mScreenTouchX = event.getRawX();
         mScreenTouchY = event.getRawY();
