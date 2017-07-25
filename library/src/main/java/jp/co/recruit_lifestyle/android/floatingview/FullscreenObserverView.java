@@ -37,6 +37,11 @@ class FullscreenObserverView extends View implements ViewTreeObserver.OnGlobalLa
     static final int NO_LAST_VISIBILITY = -1;
 
     /**
+     * Overlay Type
+     */
+    private static final int OVERLAY_TYPE;
+
+    /**
      * WindowManager.LayoutParams
      */
     private final WindowManager.LayoutParams mParams;
@@ -57,6 +62,13 @@ class FullscreenObserverView extends View implements ViewTreeObserver.OnGlobalLa
      */
     private final Rect mWindowRect;
 
+    static {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N_MR1) {
+            OVERLAY_TYPE = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+        } else {
+            OVERLAY_TYPE = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        }
+    }
 
     /**
      * コンストラクタ
@@ -71,7 +83,7 @@ class FullscreenObserverView extends View implements ViewTreeObserver.OnGlobalLa
         mParams = new WindowManager.LayoutParams();
         mParams.width = 1;
         mParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
-        mParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+        mParams.type = OVERLAY_TYPE;
         mParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;

@@ -13,7 +13,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -87,7 +86,7 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
         mFloatingViewManager.addViewToWindow(iconView, options);
 
         // 常駐起動
-        startForeground(NOTIFICATION_ID, createNotification());
+        startForeground(NOTIFICATION_ID, createNotification(this));
 
         return START_REDELIVER_INTENT;
     }
@@ -145,19 +144,19 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
     /**
      * 通知を表示します。
      */
-    private Notification createNotification() {
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+    private static Notification createNotification(Context context) {
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, context.getString(R.string.default_floatingview_channel_id));
         builder.setWhen(System.currentTimeMillis());
         builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setContentTitle(getString(R.string.mail_content_title));
-        builder.setContentText(getString(R.string.content_text));
+        builder.setContentTitle(context.getString(R.string.mail_content_title));
+        builder.setContentText(context.getString(R.string.content_text));
         builder.setOngoing(true);
         builder.setPriority(NotificationCompat.PRIORITY_MIN);
         builder.setCategory(NotificationCompat.CATEGORY_SERVICE);
 
         // PendingIntent作成
-        final Intent notifyIntent = new Intent(this, DeleteActionActivity.class);
-        PendingIntent notifyPendingIntent = PendingIntent.getActivity(this, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        final Intent notifyIntent = new Intent(context, DeleteActionActivity.class);
+        PendingIntent notifyPendingIntent = PendingIntent.getActivity(context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(notifyPendingIntent);
 
         return builder.build();

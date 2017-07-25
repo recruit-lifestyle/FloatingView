@@ -69,6 +69,7 @@ Describe the process (`onFinishFloatingView`) that is called when you exit the F
 ```  
   
 6) Define the Service to AndroidManifest
+
 example)
 ```java
     <application ...>
@@ -81,10 +82,26 @@ example)
     </application>
 ```
   
-7) Describe the process to start the Service (example of Fragment)
+7) Describe the process to start the Service (run on foreground)
 ```java
-    final Activity activity = getActivity();
-    activity.startService(new Intent(activity, ChatHeadService.class));
+    final Intent intent = new Intent(activity, ChatHeadService.class);
+    ContextCompat.startForegroundService(activity, intent);
+```
+
+8) Create notification channel (targetSdkVersion >= 26)
+
+example)
+```java
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    final String channelId = getString(R.string.default_floatingview_channel_id);
+    final String channelName = getString(R.string.default_floatingview_channel_name);
+    final NotificationChannel defaultChannel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_MIN);
+    final NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    if (manager != null) {
+        manager.createNotificationChannel(defaultChannel);
+    }
+}
+
 ```
 
 ## Static Options
