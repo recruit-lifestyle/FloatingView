@@ -24,7 +24,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IntDef;
-import android.support.v4.view.ViewCompat;
 import android.util.DisplayMetrics;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
@@ -129,6 +128,9 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      */
     private final WindowManager mWindowManager;
 
+    /**
+     * {@link DisplayMetrics}
+     */
     private final DisplayMetrics mDisplayMetrics;
 
     /**
@@ -244,9 +246,6 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         }
         final boolean isPortrait = mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
-        if (!ViewCompat.isAttachedToWindow(mTargetFloatingView)) {
-            return;
-        }
         // update FloatingView layout
         mTargetFloatingView.onUpdateSystemLayout(isHideStatusBar, isHideNavigationBar, isPortrait);
 

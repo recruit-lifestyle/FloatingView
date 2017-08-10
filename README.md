@@ -25,7 +25,7 @@ Min Sdk Version : 14
   }
 
   dependencies {
-    compile 'com.github.recruit-lifestyle:FloatingView:2.2.1'
+    compile 'com.github.recruit-lifestyle:FloatingView:2.2.2'
   }
   ```
   
@@ -105,7 +105,7 @@ mFloatingViewManager.addViewToWindow(iconView, options);
 |floatingViewY|Y coordinate of initial display<br>(default) top of display|  
 |floatingViewWidth|FloatingView width<br>(default) The width of the layout added to FloatingView |  
 |floatingViewHeight|FloatingView height<br>(default) The height of the layout added to FloatingView|  
-|moveDirection|`FloatingViewManager.MOVE_DIRECTION_DEFAULT`:Left end or right end(default)<br> `FloatingViewManager.MOVE_DIRECTION_LEFT`:Left end<br>`FloatingViewManager.MOVE_DIRECTION_RIGHT`:Right end<br>`FloatingViewManager.MOVE_DIRECTION_NONE`:Not move<br>|  
+|moveDirection|`FloatingViewManager.MOVE_DIRECTION_DEFAULT`:Left end or right end(default)<br> `FloatingViewManager.MOVE_DIRECTION_LEFT`:Left end<br>`FloatingViewManager.MOVE_DIRECTION_RIGHT`:Right end<br>`FloatingViewManager.MOVE_DIRECTION_NONE`:Not move<br>`FloatingViewManager.MOVE_DIRECTION_NEAREST`:Move nearest edge|  
 |animateInitialMove|If true, animation when first displayed<br>(FloatingViewX, floatingViewY) to screen edge<br>Info: If `MOVE_DIRECTION_NONE` is set, nothing happens|  
 
 ## Dynamic Options
