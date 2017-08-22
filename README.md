@@ -12,7 +12,7 @@ To API Level 14 or later are supported
 [SimpleFloating](http://youtu.be/nb8M2p0agF4)
 
 ## Requirements
-Target Sdk Version : 25  
+Target Sdk Version : 26
 Min Sdk Version : 14  
 
 ## How to use
