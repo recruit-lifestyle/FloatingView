@@ -13,8 +13,8 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-annotations:26.0.1'
-    compile 'com.android.support:support-compat:26.0.1'
+    compile 'com.android.support:support-annotations:26.0.2'
+    compile 'com.android.support:support-compat:26.0.2'
 }
 
 // build a jar with source files
