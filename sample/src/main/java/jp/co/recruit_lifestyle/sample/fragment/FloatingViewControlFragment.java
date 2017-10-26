@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -111,13 +112,15 @@ public class FloatingViewControlFragment extends Fragment {
     private void showChatHead(Context context, boolean isShowOverlayPermission) {
         // API22以下かチェック
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            context.startService(new Intent(context, ChatHeadService.class));
+            final Intent intent = new Intent(context, ChatHeadService.class);
+            ContextCompat.startForegroundService(context, intent);
             return;
         }
 
         // 他のアプリの上に表示できるかチェック
         if (Settings.canDrawOverlays(context)) {
-            context.startService(new Intent(context, ChatHeadService.class));
+            final Intent intent = new Intent(context, ChatHeadService.class);
+            ContextCompat.startForegroundService(context, intent);
             return;
         }
 
@@ -138,13 +141,15 @@ public class FloatingViewControlFragment extends Fragment {
     private void showCustomFloatingView(Context context, boolean isShowOverlayPermission) {
         // API22以下かチェック
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            context.startService(new Intent(context, CustomFloatingViewService.class));
+            final Intent intent = new Intent(context, CustomFloatingViewService.class);
+            ContextCompat.startForegroundService(context, intent);
             return;
         }
 
         // 他のアプリの上に表示できるかチェック
         if (Settings.canDrawOverlays(context)) {
-            context.startService(new Intent(context, CustomFloatingViewService.class));
+            final Intent intent = new Intent(context, CustomFloatingViewService.class);
+            ContextCompat.startForegroundService(context, intent);
             return;
         }
 
