@@ -128,6 +128,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     static final int DEFAULT_HEIGHT = ViewGroup.LayoutParams.WRAP_CONTENT;
 
     /**
+     * Overlay Type
+     */
+    private static final int OVERLAY_TYPE;
+
+    /**
      * WindowManager
      */
     private final WindowManager mWindowManager;
@@ -297,6 +302,14 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      */
     private int mRotation;
 
+    static {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N_MR1) {
+            OVERLAY_TYPE = WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
+        } else {
+            OVERLAY_TYPE = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        }
+    }
+
     /**
      * コンストラクタ
      *
@@ -310,7 +323,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         mWindowManager.getDefaultDisplay().getMetrics(mMetrics);
         mParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
         mParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        mParams.type = WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
+        mParams.type = OVERLAY_TYPE;
         mParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS |
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -529,6 +542,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
 
         // タッチ不能な場合は何もしない
         if (!mIsDraggable) {
+            return true;
+        }
+
+        // Block while initial display animation is running
+        if (mIsInitialAnimationRunning) {
             return true;
         }
 

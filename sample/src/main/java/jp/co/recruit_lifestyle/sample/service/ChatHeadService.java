@@ -68,7 +68,7 @@ public class ChatHeadService extends Service implements FloatingViewListener {
         mFloatingViewManager.addViewToWindow(iconView, options);
 
         // 常駐起動
-        startForeground(NOTIFICATION_ID, createNotification());
+        startForeground(NOTIFICATION_ID, createNotification(this));
 
         return START_REDELIVER_INTENT;
     }
@@ -125,12 +125,12 @@ public class ChatHeadService extends Service implements FloatingViewListener {
      * 通知を表示します。
      * クリック時のアクションはありません。
      */
-    private Notification createNotification() {
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+    private static Notification createNotification(Context context) {
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, context.getString(R.string.default_floatingview_channel_id));
         builder.setWhen(System.currentTimeMillis());
         builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setContentTitle(getString(R.string.chathead_content_title));
-        builder.setContentText(getString(R.string.content_text));
+        builder.setContentTitle(context.getString(R.string.chathead_content_title));
+        builder.setContentText(context.getString(R.string.content_text));
         builder.setOngoing(true);
         builder.setPriority(NotificationCompat.PRIORITY_MIN);
         builder.setCategory(NotificationCompat.CATEGORY_SERVICE);
