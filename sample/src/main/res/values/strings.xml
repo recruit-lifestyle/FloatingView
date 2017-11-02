@@ -16,4 +16,6 @@
     <string name="touch_finished_position" formatted="false">Current position (%d,%d)</string>
     <string name="deleted_soon">FloatingView will be deleted soon.</string>
     <string name="finish_deleted">FloatingView has been deleted.</string>
+    <string name="default_floatingview_channel_id">default_floatingview_channel</string>
+    <string name="default_floatingview_channel_name">Default Channel</string>
 </resources>
