@@ -86,6 +86,26 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private static final float MOVE_TO_EDGE_OVERSHOOT_TENSION = 1.25f;
 
     /**
+     * Damping ratio constant for spring animation (X coordinate)
+     */
+    private static final float ANIMATION_SPRING_X_DAMPING_RATIO = 0.7f;
+
+    /**
+     * Stiffness constant for spring animation (X coordinate)
+     */
+    private static final float ANIMATION_SPRING_X_STIFFNESS = 350f;
+
+    /**
+     * Friction constant for fling animation (Y coordinate)
+     */
+    private static final float ANIMATION_FLING_Y_FRICTION = 1.7f;
+
+    /**
+     * Current velocity units
+     */
+    private static final int CURRENT_VELOCITY_UNITS = 1000;
+
+    /**
      * 通常状態
      */
     static final int STATE_NORMAL = 0;
@@ -628,8 +648,10 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         }
         // 押上、キャンセル
         else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            if (mVelocityTracker != null)
-                mVelocityTracker.computeCurrentVelocity(1000);
+            // compute velocity tracker
+            if (mVelocityTracker != null) {
+                mVelocityTracker.computeCurrentVelocity(CURRENT_VELOCITY_UNITS);
+            }
 
             // 判定のため長押しの状態を一時的に保持
             final boolean tmpIsLongPressed = mIsLongPressed;
@@ -757,115 +779,48 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @param goalPositionY 移動先のY座標
      * @param withAnimation アニメーションを行う場合はtrue.行わない場合はfalse
      */
-    private void moveTo(final int currentX, final int currentY, int goalPositionX, int goalPositionY, boolean withAnimation) {
+    private void moveTo(int currentX, int currentY, int goalPositionX, int goalPositionY, boolean withAnimation) {
         // 画面端からはみ出さないように調整
         goalPositionX = Math.min(Math.max(mPositionLimitRect.left, goalPositionX), mPositionLimitRect.right);
         goalPositionY = Math.min(Math.max(mPositionLimitRect.top, goalPositionY), mPositionLimitRect.bottom);
         // アニメーションを行う場合
         if (withAnimation) {
             if (mUsePhysics && mVelocityTracker != null) {
-                final float maxVelocity = ViewConfiguration.get(getContext()).getScaledMaximumFlingVelocity() / 8;
+                final float maxVelocity = ViewConfiguration.get(getContext()).getScaledMaximumFlingVelocity() / 8; // FIXME:why 8?
                 final float velocityY = -Math.min(Math.max(mVelocityTracker.getYVelocity(), -maxVelocity), maxVelocity);
+                // start X coordinate animation
+                startSpringAnimationX(goalPositionX);
 
-                SpringForce springX = new SpringForce(goalPositionX)
-                        .setDampingRatio(0.7f)
-                        .setStiffness(350f);
-
-                SpringAnimation springAnimationX = new SpringAnimation(new FloatValueHolder());
-                springAnimationX.setStartVelocity(mVelocityTracker.getXVelocity())
-                        .setStartValue(mParams.x)
-                        .setSpring(springX)
-                        .setMinimumVisibleChange(DynamicAnimation.MIN_VISIBLE_CHANGE_PIXELS)
-                        .addUpdateListener(new DynamicAnimation.OnAnimationUpdateListener() {
-                            @Override
-                            public void onAnimationUpdate(DynamicAnimation animation, float value, float velocity) {
-                                int x = Math.round(value);
-                                if (mParams.x != x && mVelocityTracker == null) {
-                                    mParams.x = x;
-                                    try {
-                                        mWindowManager.updateViewLayout(FloatingView.this, mParams);
-                                    } catch (IllegalArgumentException ignored) {
-                                    }
-                                }
-                            }
-                        })
-                        .start();
-
+                // start Y coordinate animation
                 if (mParams.y < mPositionLimitRect.bottom && mParams.y > mPositionLimitRect.top) {
-                    FlingAnimation flingAnimationY = new FlingAnimation(new FloatValueHolder());
-
-                    flingAnimationY.setStartVelocity(velocityY)
-                            .setMaxValue(mPositionLimitRect.bottom)
-                            .setMinValue(mPositionLimitRect.top)
-                            .setStartValue(mParams.y)
-                            .setFriction(1.7f)
-                            .setMinimumVisibleChange(DynamicAnimation.MIN_VISIBLE_CHANGE_PIXELS)
-                            .addUpdateListener(new DynamicAnimation.OnAnimationUpdateListener() {
-                                @Override
-                                public void onAnimationUpdate(DynamicAnimation animation, float value, float velocity) {
-                                    int y = Math.round(value);
-                                    if (mParams.y != y && mVelocityTracker == null) {
-                                        mParams.y = y;
-                                        try {
-                                            mWindowManager.updateViewLayout(FloatingView.this, mParams);
-                                        } catch (IllegalArgumentException ignored) {
-                                        }
-                                    }
-                                }
-                            })
-                            .start();
+                    startFlingAnimationY(velocityY);
                 } else {
-                    SpringForce springY = new SpringForce(currentY < mMetrics.heightPixels / 2 ? mPositionLimitRect.top : mPositionLimitRect.bottom)
-                            .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY)
-                            .setStiffness(SpringForce.STIFFNESS_LOW);
-
-                    SpringAnimation springAnimationY = new SpringAnimation(new FloatValueHolder());
-
-                    springAnimationY.setStartVelocity(velocityY)
-                            .setStartValue(mParams.y)
-                            .setSpring(springY)
-                            .setMinimumVisibleChange(DynamicAnimation.MIN_VISIBLE_CHANGE_PIXELS)
-                            .addUpdateListener(new DynamicAnimation.OnAnimationUpdateListener() {
-                                @Override
-                                public void onAnimationUpdate(DynamicAnimation animation, float value, float velocity) {
-                                    int y = Math.round(value);
-                                    if (mParams.y != y && mVelocityTracker == null) {
-                                        mParams.y = y;
-                                        try {
-                                            mWindowManager.updateViewLayout(FloatingView.this, mParams);
-                                        } catch (IllegalArgumentException ignored) {
-                                        }
-                                    }
-                                }
-                            })
-                            .start();
+                    startSpringAnimationY(currentY, velocityY);
                 }
             } else {
-              // TODO:Y座標もアニメーションさせる
-
-              //to move only y-coord
-              if (goalPositionX == currentX) {
-                  mMoveEdgeAnimator = ValueAnimator.ofInt(currentY, goalPositionY);
-                  mMoveEdgeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                      @Override
-                      public void onAnimationUpdate(ValueAnimator animation) {
-                          mParams.y = (Integer) animation.getAnimatedValue();
-                          updateViewLayout();
-                          updateInitAnimation(animation);
-                      }
-                  });
-              } else {
-                  // to move only x coord (to left or right)
-                  mParams.y = goalPositionY;
-                  mMoveEdgeAnimator = ValueAnimator.ofInt(currentX, goalPositionX);
-                  mMoveEdgeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                      @Override
-                      public void onAnimationUpdate(ValueAnimator animation) {
-                          mParams.x = (Integer) animation.getAnimatedValue();
-                          updateViewLayout();
-                          updateInitAnimation(animation);
-                      }
-                  });
+                //to move only y-coord
+                if (goalPositionX == currentX) {
+                    mMoveEdgeAnimator = ValueAnimator.ofInt(currentY, goalPositionY);
+                    mMoveEdgeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                        @Override
+                        public void onAnimationUpdate(ValueAnimator animation) {
+                            mParams.y = (Integer) animation.getAnimatedValue();
+                            updateViewLayout();
+                            updateInitAnimation(animation);
+                        }
+                    });
+                } else {
+                    // to move only x coord (to left or right)
+                    mParams.y = goalPositionY;
+                    mMoveEdgeAnimator = ValueAnimator.ofInt(currentX, goalPositionX);
+                    mMoveEdgeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                        @Override
+                        public void onAnimationUpdate(ValueAnimator animation) {
+                            mParams.x = (Integer) animation.getAnimatedValue();
+                            updateViewLayout();
+                            updateInitAnimation(animation);
+                        }
+                    });
                 }
                 // X軸のアニメーション設定
                 mMoveEdgeAnimator.setDuration(MOVE_TO_EDGE_DURATION);
@@ -886,6 +841,98 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         mScreenTouchDownX = 0;
         mScreenTouchDownY = 0;
         mIsMoveAccept = false;
+    }
+
+    /**
+     * Start spring animation(X coordinate)
+     *
+     * @param goalPositionX goal position X
+     */
+    private void startSpringAnimationX(int goalPositionX) {
+        // springX
+        final SpringForce springX = new SpringForce(goalPositionX);
+        springX.setDampingRatio(ANIMATION_SPRING_X_DAMPING_RATIO);
+        springX.setStiffness(ANIMATION_SPRING_X_STIFFNESS);
+        // springAnimation
+        final SpringAnimation springAnimationX = new SpringAnimation(new FloatValueHolder());
+        springAnimationX.setStartVelocity(mVelocityTracker.getXVelocity());
+        springAnimationX.setStartValue(mParams.x);
+        springAnimationX.setSpring(springX);
+        springAnimationX.setMinimumVisibleChange(DynamicAnimation.MIN_VISIBLE_CHANGE_PIXELS);
+        springAnimationX.addUpdateListener(new DynamicAnimation.OnAnimationUpdateListener() {
+            @Override
+            public void onAnimationUpdate(DynamicAnimation animation, float value, float velocity) {
+                final int x = Math.round(value);
+                if (mParams.x == x || mVelocityTracker != null) {
+                    return;
+                }
+                // update x coordinate
+                mParams.x = x;
+                updateViewLayout();
+            }
+        });
+        springAnimationX.start();
+    }
+
+    /**
+     * Start fling animation(Y coordinate)
+     *
+     * @param velocityY velocity Y
+     */
+    private void startFlingAnimationY(float velocityY) {
+        final FlingAnimation flingAnimationY = new FlingAnimation(new FloatValueHolder());
+        flingAnimationY.setStartVelocity(velocityY);
+        flingAnimationY.setMaxValue(mPositionLimitRect.bottom);
+        flingAnimationY.setMinValue(mPositionLimitRect.top);
+        flingAnimationY.setStartValue(mParams.y);
+        flingAnimationY.setFriction(ANIMATION_FLING_Y_FRICTION);
+        flingAnimationY.setMinimumVisibleChange(DynamicAnimation.MIN_VISIBLE_CHANGE_PIXELS);
+        flingAnimationY.addUpdateListener(new DynamicAnimation.OnAnimationUpdateListener() {
+            @Override
+            public void onAnimationUpdate(DynamicAnimation animation, float value, float velocity) {
+                final int y = Math.round(value);
+                if (mParams.y == y || mVelocityTracker != null) {
+                    return;
+                }
+                // update y coordinate
+                mParams.y = y;
+                updateViewLayout();
+            }
+        });
+        flingAnimationY.start();
+    }
+
+    /**
+     * Start spring animation(Y coordinate)
+     *
+     * @param currentY  current Y coordinate
+     * @param velocityY velocity Y coordinate
+     */
+    private void startSpringAnimationY(int currentY, float velocityY) {
+        // Create SpringForce
+        final SpringForce springY = new SpringForce(currentY < mMetrics.heightPixels / 2 ? mPositionLimitRect.top : mPositionLimitRect.bottom);
+        springY.setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY);
+        springY.setStiffness(SpringForce.STIFFNESS_LOW);
+
+        // Create SpringAnimation
+        final SpringAnimation springAnimationY = new SpringAnimation(new FloatValueHolder());
+        springAnimationY.setStartVelocity(velocityY);
+        springAnimationY.setStartValue(mParams.y);
+        springAnimationY.setSpring(springY);
+        springAnimationY.setMinimumVisibleChange(DynamicAnimation.MIN_VISIBLE_CHANGE_PIXELS);
+        springAnimationY.addUpdateListener(new DynamicAnimation.OnAnimationUpdateListener() {
+            @Override
+            public void onAnimationUpdate(DynamicAnimation animation, float value, float velocity) {
+                final int y = Math.round(value);
+                if (mParams.y == y || mVelocityTracker != null) {
+                    return;
+                }
+                // update y coordinate
+                mParams.y = y;
+                updateViewLayout();
+            }
+        });
+        springAnimationY.start();
     }
 
     /**
@@ -943,12 +990,12 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         }
         // Move in the direction in which it is thrown
         else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_THROWN) {
-            float minVelocity = ViewConfiguration.get(getContext()).getScaledMaximumFlingVelocity() / 9;
-            if (mVelocityTracker != null && mVelocityTracker.getXVelocity() > minVelocity)
+            final float minVelocity = ViewConfiguration.get(getContext()).getScaledMaximumFlingVelocity() / 9; // FIXME:why 9?
+            if (mVelocityTracker != null && mVelocityTracker.getXVelocity() > minVelocity) {
                 goalPositionX = mPositionLimitRect.right;
-            else if (mVelocityTracker != null && mVelocityTracker.getXVelocity() < -minVelocity)
+            } else if (mVelocityTracker != null && mVelocityTracker.getXVelocity() < -minVelocity) {
                 goalPositionX = mPositionLimitRect.left;
-            else {
+            } else {
                 final boolean isMoveRightEdge = startX > (mMetrics.widthPixels - getWidth()) / 2;
                 goalPositionX = isMoveRightEdge ? mPositionLimitRect.right : mPositionLimitRect.left;
             }

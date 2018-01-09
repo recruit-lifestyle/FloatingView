@@ -93,7 +93,6 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      */
     public static final int MOVE_DIRECTION_THROWN = 5;
 
-
     /**
      * Moving direction
      */
