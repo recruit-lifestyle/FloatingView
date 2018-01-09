@@ -1,3 +1,4 @@
-<manifest package="jp.co.recruit_lifestyle.android.floatingview">
-
+<manifest package="jp.co.recruit_lifestyle.android.floatingview"
+          xmlns:tools="http://schemas.android.com/tools">
+    <uses-sdk tools:overrideLibrary="android.support.dynamicanimation" />
 </manifest>
