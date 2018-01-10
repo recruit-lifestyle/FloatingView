@@ -672,8 +672,6 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
                 mVelocityTracker.recycle();
                 mVelocityTracker = null;
             }
-            // 動かされていなければ、クリックイベントを発行
-
 
             // When ACTION_UP is done (when not pressed or moved)
             if (action == MotionEvent.ACTION_UP && !tmpIsLongPressed && !mIsMoveAccept) {

@@ -31,7 +31,7 @@
         <item>右のみ</item>
         <item>上下左右端の近い方</item>
         <item>吸着しない</item>
-        <item>物理アニメーションに従う</item>
+        <item>フリックした方向</item>
     </string-array>
 
 </resources>
