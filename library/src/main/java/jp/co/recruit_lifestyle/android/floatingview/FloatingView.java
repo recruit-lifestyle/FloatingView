@@ -233,6 +233,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private int mNavigationBarHorizontalOffset;
 
     /**
+     * Offset of touch X coordinate
+     */
+    private int mTouchXOffset;
+
+    /**
      * 左・右端に寄せるアニメーション
      */
     private ValueAnimator mMoveEdgeAnimator;
@@ -434,10 +439,13 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @param isHideStatusBar     If true, the status bar is hidden
      * @param isHideNavigationBar If true, the navigation bar is hidden
      * @param isPortrait          If true, the device orientation is portrait
+     * @param hasTouchXOffset     If true, offset is required for touched X coordinate
      */
-    void onUpdateSystemLayout(boolean isHideStatusBar, boolean isHideNavigationBar, boolean isPortrait) {
+    void onUpdateSystemLayout(boolean isHideStatusBar, boolean isHideNavigationBar, boolean isPortrait, boolean hasTouchXOffset) {
         // status bar
         mStatusBarHeight = isHideStatusBar ? 0 : mBaseStatusBarHeight;
+        // touch X offset(navigation bar is displayed and it is on the left side of the device)
+        mTouchXOffset = !isHideNavigationBar && hasTouchXOffset ? mBaseNavigationBarRotatedHeight : 0;
         // navigation bar
         updateNavigationBarOffset(isHideNavigationBar, isPortrait);
         refreshLimitRect();
@@ -964,7 +972,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @return FloatingViewのX座標
      */
     private int getXByTouch() {
-        return (int) (mScreenTouchX - mLocalTouchX);
+        return (int) (mScreenTouchX - mLocalTouchX - mTouchXOffset);
     }
 
     /**
