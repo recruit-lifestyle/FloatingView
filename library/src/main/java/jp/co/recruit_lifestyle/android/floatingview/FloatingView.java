@@ -353,13 +353,16 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         // get navigation bar height
         final boolean hasMenuKey = ViewConfiguration.get(context).hasPermanentMenuKey();
         final boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
-        if (hasMenuKey || hasBackKey) {
-            mBaseNavigationBarHeight = 0;
-            mBaseNavigationBarRotatedHeight = 0;
-        } else {
+        final int showNavigationBarResId = resources.getIdentifier("config_showNavigationBar", "bool", "android");
+        final boolean hasNavConfig = showNavigationBarResId != 0 && resources.getBoolean(showNavigationBarResId);
+        // Navigation bar exists (config_showNavigationBar is true, or both the menu key and the back key are not exists)
+        if (hasNavConfig || (!hasMenuKey && !hasBackKey)) {
             mBaseNavigationBarHeight = getSystemUiDimensionPixelSize(resources, "navigation_bar_height");
             final String resName = mIsTablet ? "navigation_bar_height_landscape" : "navigation_bar_width";
             mBaseNavigationBarRotatedHeight = getSystemUiDimensionPixelSize(resources, resName);
+        } else {
+            mBaseNavigationBarHeight = 0;
+            mBaseNavigationBarRotatedHeight = 0;
         }
 
         // 初回描画処理用
