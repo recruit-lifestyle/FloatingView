@@ -25,7 +25,7 @@ Min Sdk Version : 14
   }
 
   dependencies {
-    compile 'com.github.recruit-lifestyle:FloatingView:2.2.4'
+    compile 'com.github.recruit-lifestyle:FloatingView:2.2.5'
   }
   ```
   
