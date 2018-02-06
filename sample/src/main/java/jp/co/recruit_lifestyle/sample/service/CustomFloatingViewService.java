@@ -121,7 +121,7 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
      * {@inheritDoc}
      */
     @Override
-    public void onTouchFinished(boolean isFinishing, int x, int y) {
+    public void onTouchFinished(View view, boolean isFinishing, int x, int y) {
         if (!isFinishing) {
             // Save the last position
             final SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();

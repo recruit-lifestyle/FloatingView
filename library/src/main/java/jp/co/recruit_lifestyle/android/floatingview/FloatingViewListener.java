@@ -17,6 +17,8 @@
 package jp.co.recruit_lifestyle.android.floatingview;
 
 
+import android.view.View;
+
 /**
  * FloatingViewのリスナです。
  */
@@ -34,6 +36,6 @@ public interface FloatingViewListener {
      * @param x           x coordinate
      * @param y           y coordinate
      */
-    void onTouchFinished(boolean isFinishing, int x, int y);
+    void onTouchFinished(View v,boolean isFinishing, int x, int y);
 
 }
