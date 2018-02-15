@@ -265,6 +265,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private int mNavigationBarHorizontalOffset;
 
     /**
+     * Offset of touch X coordinate
+     */
+    private int mTouchXOffset;
+
+    /**
      * 左・右端に寄せるアニメーション
      */
     private ValueAnimator mMoveEdgeAnimator;
@@ -386,13 +391,16 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         // get navigation bar height
         final boolean hasMenuKey = ViewConfiguration.get(context).hasPermanentMenuKey();
         final boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
-        if (hasMenuKey || hasBackKey) {
-            mBaseNavigationBarHeight = 0;
-            mBaseNavigationBarRotatedHeight = 0;
-        } else {
+        final int showNavigationBarResId = resources.getIdentifier("config_showNavigationBar", "bool", "android");
+        final boolean hasNavigationBarConfig = showNavigationBarResId != 0 && resources.getBoolean(showNavigationBarResId);
+        // Navigation bar exists (config_showNavigationBar is true, or both the menu key and the back key are not exists)
+        if (hasNavigationBarConfig || (!hasMenuKey && !hasBackKey)) {
             mBaseNavigationBarHeight = getSystemUiDimensionPixelSize(resources, "navigation_bar_height");
             final String resName = mIsTablet ? "navigation_bar_height_landscape" : "navigation_bar_width";
             mBaseNavigationBarRotatedHeight = getSystemUiDimensionPixelSize(resources, resName);
+        } else {
+            mBaseNavigationBarHeight = 0;
+            mBaseNavigationBarRotatedHeight = 0;
         }
 
         // 初回描画処理用
@@ -472,10 +480,13 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @param isHideStatusBar     If true, the status bar is hidden
      * @param isHideNavigationBar If true, the navigation bar is hidden
      * @param isPortrait          If true, the device orientation is portrait
+     * @param hasTouchXOffset     If true, offset is required for touched X coordinate
      */
-    void onUpdateSystemLayout(boolean isHideStatusBar, boolean isHideNavigationBar, boolean isPortrait) {
+    void onUpdateSystemLayout(boolean isHideStatusBar, boolean isHideNavigationBar, boolean isPortrait, boolean hasTouchXOffset) {
         // status bar
         mStatusBarHeight = isHideStatusBar ? 0 : mBaseStatusBarHeight;
+        // touch X offset(navigation bar is displayed and it is on the left side of the device)
+        mTouchXOffset = !isHideNavigationBar && hasTouchXOffset ? mBaseNavigationBarRotatedHeight : 0;
         // navigation bar
         updateNavigationBarOffset(isHideNavigationBar, isPortrait);
         refreshLimitRect();
@@ -1154,7 +1165,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @return FloatingViewのX座標
      */
     private int getXByTouch() {
-        return (int) (mScreenTouchX - mLocalTouchX);
+        return (int) (mScreenTouchX - mLocalTouchX - mTouchXOffset);
     }
 
     /**
