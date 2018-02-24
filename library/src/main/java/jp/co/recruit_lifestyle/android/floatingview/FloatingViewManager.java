@@ -369,7 +369,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             if (mFloatingViewListener != null) {
                 final boolean isFinishing = mTargetFloatingView.getState() == FloatingView.STATE_FINISHING;
                 final WindowManager.LayoutParams params = mTargetFloatingView.getWindowLayoutParams();
-                mFloatingViewListener.onTouchFinished(isFinishing, params.x, params.y);
+                mFloatingViewListener.onTouchFinished(mTargetFloatingView, isFinishing, params.x, params.y);
             }
         }
 
@@ -467,8 +467,9 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      *
      * @param view    フローティングさせるView
      * @param options Options
+     * @return floatingView
      */
-    public void addViewToWindow(View view, Options options) {
+    public FloatingView addViewToWindow(View view, Options options) {
         final boolean isFirstAttach = mFloatingViewList.isEmpty();
         // FloatingView
         final FloatingView floatingView = new FloatingView(mContext);
@@ -482,6 +483,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         // set FloatingView size
         final FrameLayout.LayoutParams targetParams = new FrameLayout.LayoutParams(options.floatingViewWidth, options.floatingViewHeight);
         view.setLayoutParams(targetParams);
+        floatingView.setTag(view.getTag());
         floatingView.addView(view);
 
         // 非表示モードの場合
@@ -503,6 +505,8 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         }
         // 必ずトップに来て欲しいので毎回貼り付け
         mWindowManager.addView(mTrashView, mTrashView.getWindowLayoutParams());
+
+        return floatingView;
     }
 
     /**
@@ -510,7 +514,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      *
      * @param floatingView FloatingView
      */
-    private void removeViewToWindow(FloatingView floatingView) {
+    public void removeViewToWindow(FloatingView floatingView) {
         final int matchIndex = mFloatingViewList.indexOf(floatingView);
         // 見つかった場合は表示とリストから削除
         if (matchIndex != -1) {
