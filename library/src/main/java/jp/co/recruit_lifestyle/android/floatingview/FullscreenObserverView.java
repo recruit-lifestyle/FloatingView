@@ -20,7 +20,6 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Build;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -63,8 +62,6 @@ class FullscreenObserverView extends View implements ViewTreeObserver.OnGlobalLa
      */
     private final Rect mWindowRect;
 
-    private OnKeyListener mKeyListener;
-
     static {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N_MR1) {
             OVERLAY_TYPE = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
@@ -87,7 +84,8 @@ class FullscreenObserverView extends View implements ViewTreeObserver.OnGlobalLa
         mParams.width = 1;
         mParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
         mParams.type = OVERLAY_TYPE;
-        mParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
+        mParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         mParams.format = PixelFormat.TRANSLUCENT;
 
@@ -142,17 +140,6 @@ class FullscreenObserverView extends View implements ViewTreeObserver.OnGlobalLa
             getWindowVisibleDisplayFrame(mWindowRect);
             mScreenChangedListener.onScreenChanged(mWindowRect, visibility);
         }
-    }
-
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        return (mKeyListener != null && mKeyListener.onKey(this, event.getKeyCode(), event)) || super.dispatchKeyEvent(event);
-    }
-
-    @Override
-    public void setOnKeyListener(OnKeyListener l) {
-        super.setOnKeyListener(l);
-        mKeyListener = l;
     }
 
     /**

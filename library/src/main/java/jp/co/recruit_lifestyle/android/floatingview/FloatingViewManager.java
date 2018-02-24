@@ -546,10 +546,6 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         mFloatingViewList.clear();
     }
 
-    public void setOnKeyListener(View.OnKeyListener listener){
-        mFullscreenObserverView.setOnKeyListener(listener);
-    }
-
     /**
      * FloatingViewを貼り付ける際のオプションを表すクラスです。
      */

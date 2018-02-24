@@ -88,15 +88,6 @@ public class ChatHeadService extends Service implements FloatingViewListener {
             }
         });
 
-        mFloatingViewManager.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                Log.d(TAG, event.getKeyCode() + " " + event.getCharacters());
-
-                return true;
-            }
-        });
-
         // 常駐起動
         startForeground(NOTIFICATION_ID, createNotification(this));
 
