@@ -61,11 +61,6 @@ import java.lang.ref.WeakReference;
 class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawListener {
 
     /**
-     * 移動に最低必要なしきい値(dp)
-     */
-    private static final float MOVE_THRESHOLD_DP = 8.0f;
-
-    /**
      * 押下時の拡大率
      */
     private static final float SCALE_PRESSED = 0.9f;
@@ -168,11 +163,25 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      */
     private final WindowManager.LayoutParams mParams;
 
-
     /**
      * VelocityTracker
      */
     private VelocityTracker mVelocityTracker;
+
+    /**
+     * {@link ViewConfiguration}
+     */
+    private ViewConfiguration mViewConfiguration;
+
+    /**
+     * Minimum threshold required for movement(px)
+     */
+    private float mMoveThreshold;
+
+    /**
+     * Maximum fling velocity
+     */
+    private float mMaximumFlingVelocity;
 
     /**
      * DisplayMetrics
@@ -388,8 +397,10 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         mBaseStatusBarHeight = getSystemUiDimensionPixelSize(resources, "status_bar_height");
         mStatusBarHeight = mBaseStatusBarHeight;
 
+        updateViewConfiguration();
+
         // get navigation bar height
-        final boolean hasMenuKey = ViewConfiguration.get(context).hasPermanentMenuKey();
+        final boolean hasMenuKey = mViewConfiguration.hasPermanentMenuKey();
         final boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
         final int showNavigationBarResId = resources.getIdentifier("config_showNavigationBar", "bool", "android");
         final boolean hasNavigationBarConfig = showNavigationBarResId != 0 && resources.getBoolean(showNavigationBarResId);
@@ -439,6 +450,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        updateViewConfiguration();
         refreshLimitRect();
     }
 
@@ -521,6 +533,15 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             mNavigationBarVerticalOffset = 0;
             mNavigationBarHorizontalOffset = mBaseNavigationBarRotatedHeight;
         }
+    }
+
+    /**
+     * Update {@link ViewConfiguration}
+     */
+    private void updateViewConfiguration() {
+        mViewConfiguration = ViewConfiguration.get(getContext());
+        mMoveThreshold = mViewConfiguration.getScaledTouchSlop();
+        mMaximumFlingVelocity = mViewConfiguration.getScaledMaximumFlingVelocity();
     }
 
     /**
@@ -647,9 +668,8 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             if (mTouchDownTime != event.getDownTime()) {
                 return true;
             }
-            final float moveThreshold = MOVE_THRESHOLD_DP * mMetrics.density;
             // 移動受付状態でない、かつX,Y軸ともにしきい値よりも小さい場合
-            if (!mIsMoveAccept && Math.abs(mScreenTouchX - mScreenTouchDownX) < moveThreshold && Math.abs(mScreenTouchY - mScreenTouchDownY) < moveThreshold) {
+            if (!mIsMoveAccept && Math.abs(mScreenTouchX - mScreenTouchDownX) < mMoveThreshold && Math.abs(mScreenTouchY - mScreenTouchDownY) < mMoveThreshold) {
                 return true;
             }
             mIsMoveAccept = true;
@@ -799,7 +819,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         // アニメーションを行う場合
         if (withAnimation) {
             if (mUsePhysics && mVelocityTracker != null) {
-                final float maxVelocity = ViewConfiguration.get(getContext()).getScaledMaximumFlingVelocity() / 8; // FIXME:why 8?
+                final float maxVelocity = mMaximumFlingVelocity / 8;// FIXME:why 8?
                 final float velocityY = -Math.min(Math.max(mVelocityTracker.getYVelocity(), -maxVelocity), maxVelocity);
                 // start X coordinate animation
                 startSpringAnimationX(goalPositionX);
@@ -1003,7 +1023,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         }
         // Move in the direction in which it is thrown
         else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_THROWN) {
-            final float minVelocity = ViewConfiguration.get(getContext()).getScaledMaximumFlingVelocity() / 9; // FIXME:why 9?
+            final float minVelocity = mMaximumFlingVelocity / 9;// FIXME:why 9?
             if (mVelocityTracker != null && mVelocityTracker.getXVelocity() > minVelocity) {
                 goalPositionX = mPositionLimitRect.right;
             } else if (mVelocityTracker != null && mVelocityTracker.getXVelocity() < -minVelocity) {
