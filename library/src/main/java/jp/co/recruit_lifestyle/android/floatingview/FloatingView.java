@@ -678,7 +678,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             // 拡大率をもとに戻す
             setScale(SCALE_NORMAL);
 
-            // 動かされていれば画面端に戻す
+            // destroy VelocityTracker
             if (!mIsMoveAccept) {
                 mVelocityTracker.recycle();
                 mVelocityTracker = null;
