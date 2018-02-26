@@ -654,8 +654,12 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             }
             mIsMoveAccept = true;
             mAnimationHandler.updateTouchPosition(getXByTouch(), getYByTouch());
-            event.setLocation(event.getRawX(), event.getRawY());
+            // compute offset and restore
+            final float deltaX = event.getRawX() - event.getX();
+            final float deltaY = event.getRawY() - event.getY();
+            event.offsetLocation(deltaX, deltaY);
             mVelocityTracker.addMovement(event);
+            event.offsetLocation(-deltaX, -deltaY);
         }
         // 押上、キャンセル
         else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
