@@ -843,7 +843,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
                         }
                     });
                 } else {
-                    // to move only x coord (to left or right)
+                    // To move only x coord (to left or right)
                     mParams.y = goalPositionY;
                     mMoveEdgeAnimator = ValueAnimator.ofInt(currentX, goalPositionX);
                     mMoveEdgeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -896,6 +896,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             @Override
             public void onAnimationUpdate(DynamicAnimation animation, float value, float velocity) {
                 final int x = Math.round(value);
+                // Not moving, or the touch operation is continuing
                 if (mParams.x == x || mVelocityTracker != null) {
                     return;
                 }
@@ -924,6 +925,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             @Override
             public void onAnimationUpdate(DynamicAnimation animation, float value, float velocity) {
                 final int y = Math.round(value);
+                // Not moving, or the touch operation is continuing
                 if (mParams.y == y || mVelocityTracker != null) {
                     return;
                 }
@@ -957,6 +959,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             @Override
             public void onAnimationUpdate(DynamicAnimation animation, float value, float velocity) {
                 final int y = Math.round(value);
+                // Not moving, or the touch operation is continuing
                 if (mParams.y == y || mVelocityTracker != null) {
                     return;
                 }
