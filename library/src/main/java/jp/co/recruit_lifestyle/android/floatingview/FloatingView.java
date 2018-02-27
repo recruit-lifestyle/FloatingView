@@ -654,7 +654,8 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             // 押下処理の通過判定のための時間保持
             // mIsDraggableやgetVisibility()のフラグが押下後に変更された場合にMOVE等を処理させないようにするため
             mTouchDownTime = event.getDownTime();
-            mVelocityTracker.addMovement(event);
+            // compute offset and restore
+            addMovement(event);
             mIsInitialAnimationRunning = false;
         }
         // 移動
@@ -675,11 +676,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             mIsMoveAccept = true;
             mAnimationHandler.updateTouchPosition(getXByTouch(), getYByTouch());
             // compute offset and restore
-            final float deltaX = event.getRawX() - event.getX();
-            final float deltaY = event.getRawY() - event.getY();
-            event.offsetLocation(deltaX, deltaY);
-            mVelocityTracker.addMovement(event);
-            event.offsetLocation(-deltaX, -deltaY);
+            addMovement(event);
         }
         // 押上、キャンセル
         else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
@@ -736,6 +733,19 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         }
 
         return true;
+    }
+
+    /**
+     * Call addMovent and restore MotionEvent coords
+     *
+     * @param event {@link MotionEvent}
+     */
+    private void addMovement(@NonNull MotionEvent event) {
+        final float deltaX = event.getRawX() - event.getX();
+        final float deltaY = event.getRawY() - event.getY();
+        event.offsetLocation(deltaX, deltaY);
+        mVelocityTracker.addMovement(event);
+        event.offsetLocation(-deltaX, -deltaY);
     }
 
     /**
