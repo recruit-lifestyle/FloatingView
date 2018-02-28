@@ -91,6 +91,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private static final float ANIMATION_SPRING_X_STIFFNESS = 350f;
 
     /**
+     * Friction constant for fling animation (X coordinate)
+     */
+    private static final float ANIMATION_FLING_X_FRICTION = 1.7f;
+
+    /**
      * Friction constant for fling animation (Y coordinate)
      */
     private static final float ANIMATION_FLING_Y_FRICTION = 1.7f;
@@ -127,6 +132,16 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * 長押し判定とする時間(移動操作も考慮して通常の1.5倍)
      */
     private static final int LONG_PRESS_TIMEOUT = (int) (1.5f * ViewConfiguration.getLongPressTimeout());
+
+    /**
+     * Constant for scaling down X coordinate velocity
+     */
+    private static final float MAX_X_VELOCITY_SCALE_DOWN_VALUE = 9;
+
+    /**
+     * Constant for scaling down Y coordinate velocity
+     */
+    private static final float MAX_Y_VELOCITY_SCALE_DOWN_VALUE = 8;
 
     /**
      * デフォルトのX座標を表す値
@@ -182,6 +197,16 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * Maximum fling velocity
      */
     private float mMaximumFlingVelocity;
+
+    /**
+     * Maximum x coords velocity
+     */
+    private float mMaximumXVelocity;
+
+    /**
+     * Maximum x coords velocity
+     */
+    private float mMaximumYVelocity;
 
     /**
      * DisplayMetrics
@@ -542,6 +567,8 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         mViewConfiguration = ViewConfiguration.get(getContext());
         mMoveThreshold = mViewConfiguration.getScaledTouchSlop();
         mMaximumFlingVelocity = mViewConfiguration.getScaledMaximumFlingVelocity();
+        mMaximumXVelocity = mMaximumFlingVelocity / MAX_X_VELOCITY_SCALE_DOWN_VALUE;
+        mMaximumYVelocity = mMaximumFlingVelocity / MAX_Y_VELOCITY_SCALE_DOWN_VALUE;
     }
 
     /**
@@ -830,13 +857,20 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         if (withAnimation) {
             // Use physics animation
             if (mUsePhysics && mVelocityTracker != null) {
-                final float maxYVelocity = mMaximumFlingVelocity / 8;// FIXME:why 8?(MAX_Y_VELOCITY_SCALE_DOWN_VALUE)
-                final float velocityY = -Math.min(Math.max(mVelocityTracker.getYVelocity(), -maxYVelocity), maxYVelocity);
                 // start X coordinate animation
-                startSpringAnimationX(goalPositionX);
+                final boolean containsLimitRectWidth = mParams.x < mPositionLimitRect.right && mParams.x > mPositionLimitRect.left;
+                // If MOVE_DIRECTION_NONE, play fling animation
+                if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_NONE && containsLimitRectWidth) {
+                    final float velocityX = Math.min(Math.max(mVelocityTracker.getXVelocity(), -mMaximumXVelocity), mMaximumXVelocity);
+                    startFlingAnimationX(velocityX);
+                } else {
+                    startSpringAnimationX(goalPositionX);
+                }
 
                 // start Y coordinate animation
-                if (mParams.y < mPositionLimitRect.bottom && mParams.y > mPositionLimitRect.top) {
+                final boolean containsLimitRectHeight = mParams.y < mPositionLimitRect.bottom && mParams.y > mPositionLimitRect.top;
+                final float velocityY = -Math.min(Math.max(mVelocityTracker.getYVelocity(), -mMaximumYVelocity), mMaximumYVelocity);
+                if (containsLimitRectHeight) {
                     startFlingAnimationY(velocityY);
                 } else {
                     startSpringAnimationY(currentY, velocityY);
@@ -917,6 +951,35 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             }
         });
         springAnimationX.start();
+    }
+
+    /**
+     * Start fling animation(X coordinate)
+     *
+     * @param velocityX velocity X
+     */
+    private void startFlingAnimationX(float velocityX) {
+        final FlingAnimation flingAnimationX = new FlingAnimation(new FloatValueHolder());
+        flingAnimationX.setStartVelocity(velocityX);
+        flingAnimationX.setMaxValue(mPositionLimitRect.right);
+        flingAnimationX.setMinValue(mPositionLimitRect.left);
+        flingAnimationX.setStartValue(mParams.x);
+        flingAnimationX.setFriction(ANIMATION_FLING_X_FRICTION);
+        flingAnimationX.setMinimumVisibleChange(DynamicAnimation.MIN_VISIBLE_CHANGE_PIXELS);
+        flingAnimationX.addUpdateListener(new DynamicAnimation.OnAnimationUpdateListener() {
+            @Override
+            public void onAnimationUpdate(DynamicAnimation animation, float value, float velocity) {
+                final int x = Math.round(value);
+                // Not moving, or the touch operation is continuing
+                if (mParams.x == x || mVelocityTracker != null) {
+                    return;
+                }
+                // update y coordinate
+                mParams.x = x;
+                updateViewLayout();
+            }
+        });
+        flingAnimationX.start();
     }
 
     /**
