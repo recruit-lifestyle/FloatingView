@@ -828,9 +828,10 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         goalPositionY = Math.min(Math.max(mPositionLimitRect.top, goalPositionY), mPositionLimitRect.bottom);
         // アニメーションを行う場合
         if (withAnimation) {
+            // Use physics animation
             if (mUsePhysics && mVelocityTracker != null) {
-                final float maxVelocity = mMaximumFlingVelocity / 8;// FIXME:why 8?
-                final float velocityY = -Math.min(Math.max(mVelocityTracker.getYVelocity(), -maxVelocity), maxVelocity);
+                final float maxYVelocity = mMaximumFlingVelocity / 8;// FIXME:why 8?(MAX_Y_VELOCITY_SCALE_DOWN_VALUE)
+                final float velocityY = -Math.min(Math.max(mVelocityTracker.getYVelocity(), -maxYVelocity), maxYVelocity);
                 // start X coordinate animation
                 startSpringAnimationX(goalPositionX);
 
@@ -841,8 +842,8 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
                     startSpringAnimationY(currentY, velocityY);
                 }
             } else {
-                //to move only y-coord
                 if (goalPositionX == currentX) {
+                    //to move only y coord
                     mMoveEdgeAnimator = ValueAnimator.ofInt(currentY, goalPositionY);
                     mMoveEdgeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                         @Override
@@ -1036,10 +1037,10 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         }
         // Move in the direction in which it is thrown
         else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_THROWN) {
-            final float minVelocity = mMaximumFlingVelocity / 9;// FIXME:why 9?
-            if (mVelocityTracker != null && mVelocityTracker.getXVelocity() > minVelocity) {
+            final float minXVelocity = mMaximumFlingVelocity / 9;// FIXME:why 9?(MIN_X_VELOCITY_SCALE_DOWN_VALUE)
+            if (mVelocityTracker != null && mVelocityTracker.getXVelocity() > minXVelocity) {
                 goalPositionX = mPositionLimitRect.right;
-            } else if (mVelocityTracker != null && mVelocityTracker.getXVelocity() < -minVelocity) {
+            } else if (mVelocityTracker != null && mVelocityTracker.getXVelocity() < -minXVelocity) {
                 goalPositionX = mPositionLimitRect.left;
             } else {
                 final boolean isMoveRightEdge = startX > (mMetrics.widthPixels - getWidth()) / 2;
