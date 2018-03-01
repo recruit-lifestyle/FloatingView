@@ -422,15 +422,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         mBaseStatusBarHeight = getSystemUiDimensionPixelSize(resources, "status_bar_height");
         mStatusBarHeight = mBaseStatusBarHeight;
 
+        // Init physics-based animation properties
         updateViewConfiguration();
 
-        // get navigation bar height
-        final boolean hasMenuKey = mViewConfiguration.hasPermanentMenuKey();
-        final boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
-        final int showNavigationBarResId = resources.getIdentifier("config_showNavigationBar", "bool", "android");
-        final boolean hasNavigationBarConfig = showNavigationBarResId != 0 && resources.getBoolean(showNavigationBarResId);
-        // Navigation bar exists (config_showNavigationBar is true, or both the menu key and the back key are not exists)
-        if (hasNavigationBarConfig || (!hasMenuKey && !hasBackKey)) {
+        // Detect NavigationBar
+        if (hasSoftNavigationBar()) {
             mBaseNavigationBarHeight = getSystemUiDimensionPixelSize(resources, "navigation_bar_height");
             final String resName = mIsTablet ? "navigation_bar_height_landscape" : "navigation_bar_width";
             mBaseNavigationBarRotatedHeight = getSystemUiDimensionPixelSize(resources, resName);
@@ -441,6 +437,29 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
 
         // 初回描画処理用
         getViewTreeObserver().addOnPreDrawListener(this);
+    }
+
+    /**
+     * Check if there is a software navigation bar(including the navigation bar in the screen).
+     *
+     * @return True if there is a software navigation bar
+     */
+    private boolean hasSoftNavigationBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            final DisplayMetrics realDisplayMetrics = new DisplayMetrics();
+            mWindowManager.getDefaultDisplay().getRealMetrics(realDisplayMetrics);
+            return realDisplayMetrics.heightPixels > mMetrics.heightPixels || realDisplayMetrics.widthPixels > mMetrics.widthPixels;
+        }
+
+        // old device check flow
+        // Navigation bar exists (config_showNavigationBar is true, or both the menu key and the back key are not exists)
+        final Context context = getContext();
+        final Resources resources = context.getResources();
+        final boolean hasMenuKey = ViewConfiguration.get(context).hasPermanentMenuKey();
+        final boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
+        final int showNavigationBarResId = resources.getIdentifier("config_showNavigationBar", "bool", "android");
+        final boolean hasNavigationBarConfig = showNavigationBarResId != 0 && resources.getBoolean(showNavigationBarResId);
+        return hasNavigationBarConfig || (!hasMenuKey && !hasBackKey);
     }
 
     /**
