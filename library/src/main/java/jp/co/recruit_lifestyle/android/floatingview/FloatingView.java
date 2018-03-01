@@ -144,6 +144,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private static final float MAX_Y_VELOCITY_SCALE_DOWN_VALUE = 8;
 
     /**
+     * Constant for calculating the threshold to move when throwing
+     */
+    private static final float THROW_THRESHOLD_SCALE_DOWN_VALUE = 9;
+
+    /**
      * デフォルトのX座標を表す値
      */
     static final int DEFAULT_X = Integer.MIN_VALUE;
@@ -207,6 +212,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * Maximum x coords velocity
      */
     private float mMaximumYVelocity;
+
+    /**
+     * Threshold to move when throwing
+     */
+    private float mThrowMoveThreshold;
 
     /**
      * DisplayMetrics
@@ -588,6 +598,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         mMaximumFlingVelocity = mViewConfiguration.getScaledMaximumFlingVelocity();
         mMaximumXVelocity = mMaximumFlingVelocity / MAX_X_VELOCITY_SCALE_DOWN_VALUE;
         mMaximumYVelocity = mMaximumFlingVelocity / MAX_Y_VELOCITY_SCALE_DOWN_VALUE;
+        mThrowMoveThreshold = mMaximumFlingVelocity / THROW_THRESHOLD_SCALE_DOWN_VALUE;
     }
 
     /**
@@ -1119,10 +1130,9 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         }
         // Move in the direction in which it is thrown
         else if (mMoveDirection == FloatingViewManager.MOVE_DIRECTION_THROWN) {
-            final float minXVelocity = mMaximumFlingVelocity / 9;// FIXME:why 9?(MIN_X_VELOCITY_SCALE_DOWN_VALUE)
-            if (mVelocityTracker != null && mVelocityTracker.getXVelocity() > minXVelocity) {
+            if (mVelocityTracker != null && mVelocityTracker.getXVelocity() > mThrowMoveThreshold) {
                 goalPositionX = mPositionLimitRect.right;
-            } else if (mVelocityTracker != null && mVelocityTracker.getXVelocity() < -minXVelocity) {
+            } else if (mVelocityTracker != null && mVelocityTracker.getXVelocity() < -mThrowMoveThreshold) {
                 goalPositionX = mPositionLimitRect.left;
             } else {
                 final boolean isMoveRightEdge = startX > (mMetrics.widthPixels - getWidth()) / 2;
