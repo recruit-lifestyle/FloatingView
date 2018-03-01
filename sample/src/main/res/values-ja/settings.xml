@@ -5,7 +5,7 @@
     <string name="settings_title_margin">画面端のマージン</string>
     <string name="settings_title_move_direction">吸着方向</string>
     <string name="settings_title_use_physics">物理アニメーションの使用</string>
-    <string name="settings_summary_use_physics">フリック時に物理アニメーション（バネ）を使用します(API 16以降)</string>
+    <string name="settings_summary_use_physics">フリック時に物理アニメーションを使用します(API 16以降)</string>
     <string name="settings_title_save_position">前回の位置を保存</string>
     <string name="settings_summary_save_position">X,Y座標の初期位置を無視</string>
     <string name="settings_title_init_x">X座標の初期値</string>
