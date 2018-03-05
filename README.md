@@ -122,7 +122,8 @@ mFloatingViewManager.addViewToWindow(iconView, options);
 |floatingViewY|Y coordinate of initial display<br>(default) top of display|  
 |floatingViewWidth|FloatingView width<br>(default) The width of the layout added to FloatingView |  
 |floatingViewHeight|FloatingView height<br>(default) The height of the layout added to FloatingView|  
-|moveDirection|`FloatingViewManager.MOVE_DIRECTION_DEFAULT`:Left end or right end(default)<br> `FloatingViewManager.MOVE_DIRECTION_LEFT`:Left end<br>`FloatingViewManager.MOVE_DIRECTION_RIGHT`:Right end<br>`FloatingViewManager.MOVE_DIRECTION_NONE`:Not move<br>`FloatingViewManager.MOVE_DIRECTION_NEAREST`:Move nearest edge|  
+|moveDirection|`FloatingViewManager.MOVE_DIRECTION_DEFAULT`:Left end or right end(default)<br> `FloatingViewManager.MOVE_DIRECTION_LEFT`:Left end<br>`FloatingViewManager.MOVE_DIRECTION_RIGHT`:Right end<br>`FloatingViewManager.MOVE_DIRECTION_NONE`:Not move<br>`FloatingViewManager.MOVE_DIRECTION_NEAREST`:Move nearest edge<br>`FloatingViewManager.MOVE_DIRECTION_THROWN`:Move in the throwing direction (left end or right end)|
+|usePhysics|Use physics-based animation(depends on `moveDirection`)|
 |animateInitialMove|If true, animation when first displayed<br>(FloatingViewX, floatingViewY) to screen edge<br>Info: If `MOVE_DIRECTION_NONE` is set, nothing happens|  
 
 ## Dynamic Options
