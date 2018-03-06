@@ -888,7 +888,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             // Use physics animation
             final boolean usePhysicsAnimation = mUsePhysics && mVelocityTracker != null && mMoveDirection != FloatingViewManager.MOVE_DIRECTION_NEAREST;
             if (usePhysicsAnimation) {
-                startPhysicsAnimation(currentY, goalPositionX);
+                startPhysicsAnimation(goalPositionX, currentY);
             } else {
                 startObjectAnimation(currentX, currentY, goalPositionX, goalPositionY);
             }
@@ -911,10 +911,10 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     /**
      * Start Physics-based animation
      *
-     * @param currentY      Current Y
      * @param goalPositionX Goal position X
+     * @param currentY      Current Y
      */
-    private void startPhysicsAnimation(int currentY, int goalPositionX) {
+    private void startPhysicsAnimation(int goalPositionX, int currentY) {
         // start X coordinate animation
         final boolean containsLimitRectWidth = mParams.x < mPositionLimitRect.right && mParams.x > mPositionLimitRect.left;
         // If MOVE_DIRECTION_NONE, play fling animation
