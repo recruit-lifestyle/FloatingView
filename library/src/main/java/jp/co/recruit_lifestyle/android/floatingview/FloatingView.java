@@ -204,12 +204,12 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private float mMaximumFlingVelocity;
 
     /**
-     * Maximum x coords velocity
+     * Maximum x coordinate velocity
      */
     private float mMaximumXVelocity;
 
     /**
-     * Maximum x coords velocity
+     * Maximum x coordinate velocity
      */
     private float mMaximumYVelocity;
 
@@ -793,7 +793,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     }
 
     /**
-     * Call addMovent and restore MotionEvent coords
+     * Call addMovement and restore MotionEvent coordinate
      *
      * @param event {@link MotionEvent}
      */
@@ -911,8 +911,8 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     /**
      * Start Physics-based animation
      *
-     * @param goalPositionX Goal position X
-     * @param currentY      Current Y
+     * @param goalPositionX goal position X coordinate
+     * @param currentY      current Y coordinate
      */
     private void startPhysicsAnimation(int goalPositionX, int currentY) {
         // start X coordinate animation
@@ -938,10 +938,10 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     /**
      * Start object animation
      *
-     * @param currentX      Current X coords
-     * @param currentY      Current Y coords
-     * @param goalPositionX Goal position X
-     * @param goalPositionY Goal position Y
+     * @param currentX      current X coordinate
+     * @param currentY      current Y coordinate
+     * @param goalPositionX goal position X coordinate
+     * @param goalPositionY goal position Y coordinate
      */
     private void startObjectAnimation(int currentX, int currentY, int goalPositionX, int goalPositionY) {
         if (goalPositionX == currentX) {
@@ -977,7 +977,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     /**
      * Start spring animation(X coordinate)
      *
-     * @param goalPositionX goal position X
+     * @param goalPositionX goal position X coordinate
      */
     private void startSpringAnimationX(int goalPositionX) {
         // springX
@@ -1043,7 +1043,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     /**
      * Start fling animation(X coordinate)
      *
-     * @param velocityX velocity X
+     * @param velocityX velocity X coordinate
      */
     private void startFlingAnimationX(float velocityX) {
         final FlingAnimation flingAnimationX = new FlingAnimation(new FloatValueHolder());
@@ -1072,7 +1072,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     /**
      * Start fling animation(Y coordinate)
      *
-     * @param velocityY velocity Y
+     * @param velocityY velocity Y coordinate
      */
     private void startFlingAnimationY(float velocityY) {
         final FlingAnimation flingAnimationY = new FlingAnimation(new FloatValueHolder());
@@ -1268,7 +1268,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * Use dynamic physics-based animations or not
      * Warning: Can not be used before API 16
      *
-     * @param usePhysics Setting this to false (default) will revert to using a ValueAnimator
+     * @param usePhysics Setting this to false will revert to using a ValueAnimator (default is true)
      */
     void usePhysics(boolean usePhysics) {
         mUsePhysics = usePhysics && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
