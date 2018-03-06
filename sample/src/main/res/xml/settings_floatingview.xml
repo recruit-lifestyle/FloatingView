@@ -34,6 +34,12 @@
         android:title="@string/settings_title_move_direction"/>
 
     <SwitchPreference
+        android:defaultValue="true"
+        android:key="settings_use_physics"
+        android:summary="@string/settings_summary_use_physics"
+        android:title="@string/settings_title_use_physics"/>
+
+    <SwitchPreference
         android:defaultValue="false"
         android:disableDependentsState="true"
         android:key="settings_save_last_position"

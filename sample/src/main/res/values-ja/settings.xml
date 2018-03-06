@@ -4,6 +4,8 @@
     <string name="settings_title_display_mode">表示モード</string>
     <string name="settings_title_margin">画面端のマージン</string>
     <string name="settings_title_move_direction">吸着方向</string>
+    <string name="settings_title_use_physics">物理アニメーションの使用</string>
+    <string name="settings_summary_use_physics">フリック時に物理アニメーションを使用します(API 16以降)</string>
     <string name="settings_title_save_position">前回の位置を保存</string>
     <string name="settings_summary_save_position">X,Y座標の初期位置を無視</string>
     <string name="settings_title_init_x">X座標の初期値</string>
@@ -29,6 +31,7 @@
         <item>右のみ</item>
         <item>上下左右端の近い方</item>
         <item>吸着しない</item>
+        <item>フリックした方向</item>
     </string-array>
 
 </resources>
