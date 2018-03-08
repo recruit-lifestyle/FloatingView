@@ -600,7 +600,7 @@ class TrashView extends FrameLayout implements ViewTreeObserver.OnPreDrawListene
         /**
          * アニメーションをリフレッシュするミリ秒
          */
-        private static final long ANIMATION_REFRESH_TIME_MILLIS = 17L;
+        private static final long ANIMATION_REFRESH_TIME_MILLIS = 10L;
 
         /**
          * 背景のアニメーション時間
