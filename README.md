@@ -12,7 +12,7 @@ To API Level 14 or later are supported
 [SimpleFloating](http://youtu.be/nb8M2p0agF4)
 
 ## Requirements
-Target Sdk Version : 27  
+Target Sdk Version : 28  
 Min Sdk Version : 14  
 
 ## How to use
@@ -66,6 +66,7 @@ Describe the process (`onFinishFloatingView`) that is called when you exit the F
 5) Add the permission to AndroidManifest
 ```xml
  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+ <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 ```  
   
 6) Define the Service to AndroidManifest
@@ -83,9 +84,25 @@ example)
 ```
   
 7) Describe the process to start the Service (run on foreground)
+
+
+example)  
+
+- FloatingViewControlFragment.java  
+
 ```java
     final Intent intent = new Intent(activity, ChatHeadService.class);
     ContextCompat.startForegroundService(activity, intent);
+```
+
+- ChatHeadService.java  
+
+```java
+public int onStartCommand(Intent intent, int flags, int startId) {
+    ...
+    startForeground(NOTIFICATION_ID, createNotification(this));
+    ...
+}
 ```
 
 8) Create notification channel (targetSdkVersion >= 26)
