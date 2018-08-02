@@ -388,6 +388,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      */
     private int mRotation;
 
+    /**
+     * Cutout safe inset rect(Same as FloatingViewManager's mSafeInsetRect)
+     */
+    private final Rect mSafeInsetRect;
+
     static {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N_MR1) {
             OVERLAY_TYPE = WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
@@ -427,6 +432,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
 
         mMoveLimitRect = new Rect();
         mPositionLimitRect = new Rect();
+        mSafeInsetRect = new Rect();
 
         // ステータスバーの高さを取得
         mBaseStatusBarHeight = getSystemUiDimensionPixelSize(resources, "status_bar_height");
@@ -620,7 +626,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
 
         // 移動範囲の設定
         mMoveLimitRect.set(-width, -height * 2, newScreenWidth + width + mNavigationBarHorizontalOffset, newScreenHeight + height + mNavigationBarVerticalOffset);
-        mPositionLimitRect.set(-mOverMargin, 0, newScreenWidth - width + mOverMargin + mNavigationBarHorizontalOffset, newScreenHeight - mStatusBarHeight - height + mNavigationBarVerticalOffset);
+        mPositionLimitRect.set(-mOverMargin, 0, newScreenWidth - width + mOverMargin + mNavigationBarHorizontalOffset, newScreenHeight - mStatusBarHeight + mSafeInsetRect.top - height + mNavigationBarVerticalOffset);
 
         // Initial animation stop when the device rotates
         final int newRotation = mWindowManager.getDefaultDisplay().getRotation();
@@ -1327,7 +1333,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @return FloatingViewのY座標
      */
     private int getYByTouch() {
-        return (int) (mMetrics.heightPixels + mNavigationBarVerticalOffset - (mScreenTouchY - mLocalTouchY + getHeight()));
+        return (int) (mMetrics.heightPixels + mNavigationBarVerticalOffset + mSafeInsetRect.top - (mScreenTouchY - mLocalTouchY + getHeight()));
     }
 
     /**
@@ -1360,6 +1366,29 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
 
     int getState() {
         return mAnimationHandler.getState();
+    }
+
+    /**
+     * Set the cutout's safe inset area
+     *
+     * @param safeInsetRect {@link FloatingViewManager#setSafeInsetRect(Rect)}
+     */
+    void setSafeInsetRect(Rect safeInsetRect) {
+        mSafeInsetRect.set(safeInsetRect);
+
+        // Check Cutout size
+        final int currentStatusBarHeight = mStatusBarHeight;
+        if (mStatusBarHeight > mSafeInsetRect.top) {
+            mStatusBarHeight = currentStatusBarHeight - mSafeInsetRect.top;
+        } else {
+            // mStatusBarHeight is not included in mMetrics.heightPixels
+            mStatusBarHeight = 0;
+        }
+
+        // Refresh Limit Rect
+        if (currentStatusBarHeight != mStatusBarHeight) {
+            refreshLimitRect();
+        }
     }
 
     /**
@@ -1520,7 +1549,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
          * アニメーション時間から求められる位置を計算します。
          *
          * @param timeRate 時間比率
-         * @return ベースとなる係数(0.0から1.0＋α)
+         * @return ベースとなる係数(0.0から1.0 ＋ α)
          */
         private static float calcAnimationPosition(float timeRate) {
             final float position;

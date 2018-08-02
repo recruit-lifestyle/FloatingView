@@ -175,6 +175,11 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
     private int mDisplayMode;
 
     /**
+     * Cutout safe inset rect
+     */
+    private final Rect mSafeInsetRect;
+
+    /**
      * Windowに貼り付けられたFloatingViewのリスト
      * TODO:第2弾のFloatingViewの複数表示で意味を発揮する予定
      */
@@ -196,6 +201,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         mTrashViewRect = new Rect();
         mIsMoveAccept = false;
         mDisplayMode = DISPLAY_MODE_HIDE_FULLSCREEN;
+        mSafeInsetRect = new Rect();
 
         // FloatingViewと連携するViewの構築
         mFloatingViewList = new ArrayList<>();
@@ -468,6 +474,20 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
     }
 
     /**
+     * Set the DisplayCutout's safe area
+     *
+     * @param safeInsetRect DisplayCutout#getSafeInsetXXX
+     */
+    public void setSafeInsetRect(Rect safeInsetRect) {
+        if (safeInsetRect == null) {
+            mSafeInsetRect.setEmpty();
+        } else {
+            mSafeInsetRect.set(safeInsetRect);
+        }
+        //TODO:update Layout
+    }
+
+    /**
      * ViewをWindowに貼り付けます。
      *
      * @param view    フローティングさせるView
@@ -484,6 +504,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         floatingView.setMoveDirection(options.moveDirection);
         floatingView.usePhysics(options.usePhysics);
         floatingView.setAnimateInitialMove(options.animateInitialMove);
+        floatingView.setSafeInsetRect(mSafeInsetRect);
 
         // set FloatingView size
         final FrameLayout.LayoutParams targetParams = new FrameLayout.LayoutParams(options.floatingViewWidth, options.floatingViewHeight);
