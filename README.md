@@ -1,6 +1,6 @@
 # FloatingView
 The Android project is View to display information such as chat in front.  
-To API Level 14 or later are supported  
+To API Level 14 or higher are supported
 
 ## Screenshots
 ![](./screenshot/animation.gif)  
@@ -120,6 +120,35 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 }
 
 ```
+
+9) Add DisplayCutout process(API Level >= 28)
+
+Note: `DisplayCutout` is obtained from `Fragment` or `Activity` (`Service` can not be acquired)
+
+example)
+
+- FloatingViewControlFragment.java
+
+```java
+final Rect safeInsetRect = new Rect();
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    final DisplayCutout displayCutout = activity.getWindow().getDecorView().getRootWindowInsets().getDisplayCutout();
+    if (displayCutout != null) {
+        safeInsetRect.set(displayCutout.getSafeInsetLeft(), displayCutout.getSafeInsetTop(), displayCutout.getSafeInsetRight(), displayCutout.getSafeInsetBottom());
+    }
+}
+
+final Intent intent = new Intent(activity, ChatHeadService.class);
+intent.putExtra(ChatHeadService.EXTRA_CUTOUT_SAFE_AREA, safeInsetRect);
+ContextCompat.startForegroundService(activity, intent);
+```
+
+- ChatHeadService.java
+
+```java
+mFloatingViewManager.setSafeInsetRect((Rect) intent.getParcelableExtra(EXTRA_CUTOUT_SAFE_AREA));
+```
+
 
 ## Static Options
 It can be set only when displaying for the first time
