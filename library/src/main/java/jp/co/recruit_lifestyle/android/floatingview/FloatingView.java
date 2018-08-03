@@ -277,9 +277,14 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private boolean mAnimateInitialMove;
 
     /**
-     * ステータスバーの高さ
+     * status bar's height
      */
     private final int mBaseStatusBarHeight;
+
+    /**
+     * status bar's height(landscape)
+     */
+    private int mBaseStatusBarRotatedHeight;
 
     /**
      * Current status bar's height
@@ -436,7 +441,13 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
 
         // ステータスバーの高さを取得
         mBaseStatusBarHeight = getSystemUiDimensionPixelSize(resources, "status_bar_height");
-        mStatusBarHeight = mBaseStatusBarHeight;
+        // Check landscape resource id
+        final int statusBarLandscapeResId = resources.getIdentifier("status_bar_height_landscape", "dimen", "android");
+        if (statusBarLandscapeResId > 0) {
+            mBaseStatusBarRotatedHeight = getSystemUiDimensionPixelSize(resources, "status_bar_height_landscape");
+        } else {
+            mBaseStatusBarRotatedHeight = mBaseStatusBarHeight;
+        }
 
         // Init physics-based animation properties
         updateViewConfiguration();
@@ -556,12 +567,27 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      */
     void onUpdateSystemLayout(boolean isHideStatusBar, boolean isHideNavigationBar, boolean isPortrait, boolean hasTouchXOffset) {
         // status bar
-        mStatusBarHeight = isHideStatusBar ? 0 : mBaseStatusBarHeight;
+        updateStatusBarHeight(isHideStatusBar, isPortrait);
         // touch X offset(navigation bar is displayed and it is on the left side of the device)
         mTouchXOffset = !isHideNavigationBar && hasTouchXOffset ? mBaseNavigationBarRotatedHeight : 0;
         // navigation bar
         updateNavigationBarOffset(isHideNavigationBar, isPortrait);
         refreshLimitRect();
+    }
+
+    /**
+     * Update height of StatusBar.
+     *
+     * @param isHideStatusBar If true, the status bar is hidden
+     * @param isPortrait      If true, the device orientation is portrait
+     */
+    private void updateStatusBarHeight(boolean isHideStatusBar, boolean isPortrait) {
+        if (isHideStatusBar) {
+            mStatusBarHeight = 0;
+            return;
+        }
+
+        mStatusBarHeight = isPortrait ? mBaseStatusBarHeight : mBaseStatusBarRotatedHeight;
     }
 
     /**
