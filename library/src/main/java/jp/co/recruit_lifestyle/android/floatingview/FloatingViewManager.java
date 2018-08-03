@@ -486,6 +486,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             mSafeInsetRect.set(safeInsetRect);
         }
         //TODO:update Layout
+        //TODO:update FloatingView
     }
 
     /**

@@ -1426,16 +1426,6 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      */
     void setSafeInsetRect(Rect safeInsetRect) {
         mSafeInsetRect.set(safeInsetRect);
-
-        // Check Cutout size
-        final int currentStatusBarHeight = mStatusBarHeight;
-        // mStatusBarHeight is not included in mMetrics.heightPixels
-        mStatusBarHeight = 0;
-
-        // Refresh Limit Rect
-        if (currentStatusBarHeight != mStatusBarHeight) {
-            refreshLimitRect();
-        }
     }
 
     /**
