@@ -319,6 +319,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private int mTouchXOffset;
 
     /**
+     * Offset of touch Y coordinate
+     */
+    private int mTouchYOffset;
+
+    /**
      * 左・右端に寄せるアニメーション
      */
     private ValueAnimator mMoveEdgeAnimator;
@@ -570,6 +575,8 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         updateStatusBarHeight(isHideStatusBar, isPortrait);
         // touch X offset(navigation bar is displayed and it is on the left side of the device)
         mTouchXOffset = !isHideNavigationBar && hasTouchXOffset ? mBaseNavigationBarRotatedHeight : 0;
+        // touch Y offset(support Cutout)
+        mTouchYOffset = isPortrait ? mSafeInsetRect.top : 0;
         // navigation bar
         updateNavigationBarOffset(isHideNavigationBar, isPortrait);
         refreshLimitRect();
@@ -583,11 +590,29 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      */
     private void updateStatusBarHeight(boolean isHideStatusBar, boolean isPortrait) {
         if (isHideStatusBar) {
+            // 1.(No Cutout)No StatusBar(=0)
+            // 2.(Has Cutout)StatusBar is not included in mMetrics.heightPixels (=0)
             mStatusBarHeight = 0;
             return;
         }
 
-        mStatusBarHeight = isPortrait ? mBaseStatusBarHeight : mBaseStatusBarRotatedHeight;
+        // Has Cutout
+        final boolean hasTopCutout = mSafeInsetRect.top != 0;
+        if (hasTopCutout) {
+            if (isPortrait) {
+                mStatusBarHeight = 0;
+            } else {
+                mStatusBarHeight = mBaseStatusBarRotatedHeight;
+            }
+            return;
+        }
+
+        // No cutout
+        if (isPortrait) {
+            mStatusBarHeight = mBaseStatusBarHeight;
+        } else {
+            mStatusBarHeight = mBaseStatusBarRotatedHeight;
+        }
     }
 
     /**
@@ -652,7 +677,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
 
         // 移動範囲の設定
         mMoveLimitRect.set(-width, -height * 2, newScreenWidth + width + mNavigationBarHorizontalOffset, newScreenHeight + height + mNavigationBarVerticalOffset);
-        mPositionLimitRect.set(-mOverMargin, 0, newScreenWidth - width + mOverMargin + mNavigationBarHorizontalOffset, newScreenHeight - mStatusBarHeight + mSafeInsetRect.top - height + mNavigationBarVerticalOffset);
+        mPositionLimitRect.set(-mOverMargin, 0, newScreenWidth - width + mOverMargin + mNavigationBarHorizontalOffset, newScreenHeight - mStatusBarHeight - height + mNavigationBarVerticalOffset);
 
         // Initial animation stop when the device rotates
         final int newRotation = mWindowManager.getDefaultDisplay().getRotation();
@@ -1359,7 +1384,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @return FloatingViewのY座標
      */
     private int getYByTouch() {
-        return (int) (mMetrics.heightPixels + mNavigationBarVerticalOffset + mSafeInsetRect.top - (mScreenTouchY - mLocalTouchY + getHeight()));
+        return (int) (mMetrics.heightPixels + mNavigationBarVerticalOffset - (mScreenTouchY - mLocalTouchY + getHeight() - mTouchYOffset));
     }
 
     /**
