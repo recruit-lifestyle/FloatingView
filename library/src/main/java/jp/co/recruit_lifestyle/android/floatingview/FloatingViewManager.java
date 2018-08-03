@@ -475,6 +475,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
 
     /**
      * Set the DisplayCutout's safe area
+     * Note:You must set the Cutout obtained on portrait orientation.
      *
      * @param safeInsetRect DisplayCutout#getSafeInsetXXX
      */

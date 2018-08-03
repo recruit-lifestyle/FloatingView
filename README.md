@@ -124,6 +124,7 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 9) Add DisplayCutout process(API Level >= 28)
 
 Note: `DisplayCutout` is obtained from `Fragment` or `Activity` (`Service` can not be acquired)
+Note: You must set the `DisplayCutout` obtained on portrait orientation.
 
 example)
 
