@@ -7,14 +7,12 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.DisplayCutout;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -147,12 +145,7 @@ public class FloatingViewControlFragment extends Fragment {
         // TODO:Rewrite with android-x
         // TODO:Consider alternatives
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            // FloatingView does not support the start of service on the landscape orientation (due to Cutout).
-            if (activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                Log.d(TAG, activity.getString(R.string.landscape_cutout_is_not_supported));
-                return;
-            }
-
+            // Note:FloatingView does not support the start of service on the landscape orientation (due to Cutout).
             final DisplayCutout displayCutout = activity.getWindow().getDecorView().getRootWindowInsets().getDisplayCutout();
             if (displayCutout != null) {
                 safeInsetRect.set(displayCutout.getSafeInsetLeft(), displayCutout.getSafeInsetTop(), displayCutout.getSafeInsetRight(), displayCutout.getSafeInsetBottom());
