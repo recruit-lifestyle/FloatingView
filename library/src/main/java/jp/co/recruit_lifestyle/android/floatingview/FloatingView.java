@@ -568,13 +568,13 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @param isHideStatusBar     If true, the status bar is hidden
      * @param isHideNavigationBar If true, the navigation bar is hidden
      * @param isPortrait          If true, the device orientation is portrait
-     * @param hasTouchXOffset     If true, offset is required for touched X coordinate
+     * @param windowLeftOffset    Left side offset of device display
      */
-    void onUpdateSystemLayout(boolean isHideStatusBar, boolean isHideNavigationBar, boolean isPortrait, boolean hasTouchXOffset) {
+    void onUpdateSystemLayout(boolean isHideStatusBar, boolean isHideNavigationBar, boolean isPortrait, int windowLeftOffset) {
         // status bar
         updateStatusBarHeight(isHideStatusBar, isPortrait);
-        // touch X offset(navigation bar is displayed and it is on the left side of the device)
-        mTouchXOffset = !isHideNavigationBar && hasTouchXOffset ? mBaseNavigationBarRotatedHeight : 0;
+        // touch X offset(support Cutout)
+        updateTouchXOffset(isHideNavigationBar, windowLeftOffset);
         // touch Y offset(support Cutout)
         mTouchYOffset = isPortrait ? mSafeInsetRect.top : 0;
         // navigation bar
@@ -612,6 +612,22 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             mStatusBarHeight = mBaseStatusBarHeight;
         } else {
             mStatusBarHeight = mBaseStatusBarRotatedHeight;
+        }
+    }
+
+    /**
+     * Update of touch X coordinate
+     *
+     * @param isHideNavigationBar If true, the navigation bar is hidden
+     * @param windowLeftOffset    Left side offset of device display
+     */
+    private void updateTouchXOffset(boolean isHideNavigationBar, int windowLeftOffset) {
+        final boolean noBottomCutout = mSafeInsetRect.bottom == 0;
+        if (noBottomCutout) {
+            // touch X offset(navigation bar is displayed and it is on the left side of the device)
+            mTouchXOffset = !isHideNavigationBar && windowLeftOffset > 0 ? mBaseNavigationBarRotatedHeight : 0;
+        } else {
+            mTouchXOffset = windowLeftOffset;
         }
     }
 

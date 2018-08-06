@@ -251,11 +251,8 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         }
         final boolean isPortrait = mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
-        // touch X offset(navigation bar is on the left side)
-        final boolean hasTouchXOffset = windowRect.left > 0;
-
         // update FloatingView layout
-        mTargetFloatingView.onUpdateSystemLayout(isHideStatusBar, isHideNavigationBar, isPortrait, hasTouchXOffset);
+        mTargetFloatingView.onUpdateSystemLayout(isHideStatusBar, isHideNavigationBar, isPortrait, windowRect.left);
 
         // フルスクリーンでの非表示モードでない場合は何もしない
         if (mDisplayMode != DISPLAY_MODE_HIDE_FULLSCREEN) {
@@ -442,13 +439,13 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         mDisplayMode = displayMode;
         // 常に表示/フルスクリーン時に非表示にするモードの場合
         if (mDisplayMode == DISPLAY_MODE_SHOW_ALWAYS || mDisplayMode == DISPLAY_MODE_HIDE_FULLSCREEN) {
-            for (FloatingView floatingView : mFloatingViewList) {
+            for (FloatingView floatingView: mFloatingViewList) {
                 floatingView.setVisibility(View.VISIBLE);
             }
         }
         // 常に非表示にするモードの場合
         else if (mDisplayMode == DISPLAY_MODE_HIDE_ALWAYS) {
-            for (FloatingView floatingView : mFloatingViewList) {
+            for (FloatingView floatingView: mFloatingViewList) {
                 floatingView.setVisibility(View.GONE);
             }
             mTrashView.dismiss();
