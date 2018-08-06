@@ -482,8 +482,19 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         } else {
             mSafeInsetRect.set(safeInsetRect);
         }
-        //TODO:update Layout
-        //TODO:update FloatingView
+
+        final int size = mFloatingViewList.size();
+        if (size == 0) {
+            return;
+        }
+
+        // update floating view
+        for (int i = 0; i < size; i++) {
+            final FloatingView floatingView = mFloatingViewList.get(i);
+            floatingView.setSafeInsetRect(mSafeInsetRect);
+        }
+        // dirty hack
+        mFullscreenObserverView.onGlobalLayout();
     }
 
     /**
