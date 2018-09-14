@@ -7,6 +7,7 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
@@ -17,6 +18,7 @@ import android.view.DisplayCutout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 
 import jp.co.recruit.floatingview.R;
 import jp.co.recruit_lifestyle.sample.service.ChatHeadService;
@@ -145,10 +147,19 @@ public class FloatingViewControlFragment extends Fragment {
         // TODO:Rewrite with android-x
         // TODO:Consider alternatives
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            // Note:FloatingView does not support the start of service on the landscape orientation (due to Cutout).
             final DisplayCutout displayCutout = activity.getWindow().getDecorView().getRootWindowInsets().getDisplayCutout();
             if (displayCutout != null) {
                 safeInsetRect.set(displayCutout.getSafeInsetLeft(), displayCutout.getSafeInsetTop(), displayCutout.getSafeInsetRight(), displayCutout.getSafeInsetBottom());
+
+                // *** You must follow these rules when obtain the cutout ***
+                // 1. 'windowLayoutInDisplayCutoutMode' do not be set to 'never'
+                if (activity.getWindow().getAttributes().layoutInDisplayCutoutMode == WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER) {
+                    throw new RuntimeException("'windowLayoutInDisplayCutoutMode' do not be set to 'never'");
+                }
+                // 2. Do not set Activity to landscape
+                if(activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+                    throw new RuntimeException("Do not set Activity to landscape");
+                }
             }
         }
 
