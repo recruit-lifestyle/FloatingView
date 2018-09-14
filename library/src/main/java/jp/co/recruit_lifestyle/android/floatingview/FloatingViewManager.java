@@ -175,6 +175,11 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
     private int mDisplayMode;
 
     /**
+     * Cutout safe inset rect
+     */
+    private final Rect mSafeInsetRect;
+
+    /**
      * Windowに貼り付けられたFloatingViewのリスト
      * TODO:第2弾のFloatingViewの複数表示で意味を発揮する予定
      */
@@ -196,6 +201,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         mTrashViewRect = new Rect();
         mIsMoveAccept = false;
         mDisplayMode = DISPLAY_MODE_HIDE_FULLSCREEN;
+        mSafeInsetRect = new Rect();
 
         // FloatingViewと連携するViewの構築
         mFloatingViewList = new ArrayList<>();
@@ -245,11 +251,8 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         }
         final boolean isPortrait = mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
-        // touch X offset(navigation bar is on the left side)
-        final boolean hasTouchXOffset = windowRect.left > 0;
-
         // update FloatingView layout
-        mTargetFloatingView.onUpdateSystemLayout(isHideStatusBar, isHideNavigationBar, isPortrait, hasTouchXOffset);
+        mTargetFloatingView.onUpdateSystemLayout(isHideStatusBar, isHideNavigationBar, isPortrait, windowRect.left);
 
         // フルスクリーンでの非表示モードでない場合は何もしない
         if (mDisplayMode != DISPLAY_MODE_HIDE_FULLSCREEN) {
@@ -436,13 +439,13 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         mDisplayMode = displayMode;
         // 常に表示/フルスクリーン時に非表示にするモードの場合
         if (mDisplayMode == DISPLAY_MODE_SHOW_ALWAYS || mDisplayMode == DISPLAY_MODE_HIDE_FULLSCREEN) {
-            for (FloatingView floatingView : mFloatingViewList) {
+            for (FloatingView floatingView: mFloatingViewList) {
                 floatingView.setVisibility(View.VISIBLE);
             }
         }
         // 常に非表示にするモードの場合
         else if (mDisplayMode == DISPLAY_MODE_HIDE_ALWAYS) {
-            for (FloatingView floatingView : mFloatingViewList) {
+            for (FloatingView floatingView: mFloatingViewList) {
                 floatingView.setVisibility(View.GONE);
             }
             mTrashView.dismiss();
@@ -468,6 +471,33 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
     }
 
     /**
+     * Set the DisplayCutout's safe area
+     * Note:You must set the Cutout obtained on portrait orientation.
+     *
+     * @param safeInsetRect DisplayCutout#getSafeInsetXXX
+     */
+    public void setSafeInsetRect(Rect safeInsetRect) {
+        if (safeInsetRect == null) {
+            mSafeInsetRect.setEmpty();
+        } else {
+            mSafeInsetRect.set(safeInsetRect);
+        }
+
+        final int size = mFloatingViewList.size();
+        if (size == 0) {
+            return;
+        }
+
+        // update floating view
+        for (int i = 0; i < size; i++) {
+            final FloatingView floatingView = mFloatingViewList.get(i);
+            floatingView.setSafeInsetRect(mSafeInsetRect);
+        }
+        // dirty hack
+        mFullscreenObserverView.onGlobalLayout();
+    }
+
+    /**
      * ViewをWindowに貼り付けます。
      *
      * @param view    フローティングさせるView
@@ -484,6 +514,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         floatingView.setMoveDirection(options.moveDirection);
         floatingView.usePhysics(options.usePhysics);
         floatingView.setAnimateInitialMove(options.animateInitialMove);
+        floatingView.setSafeInsetRect(mSafeInsetRect);
 
         // set FloatingView size
         final FrameLayout.LayoutParams targetParams = new FrameLayout.LayoutParams(options.floatingViewWidth, options.floatingViewHeight);

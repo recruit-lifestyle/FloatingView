@@ -1,23 +1,25 @@
-<manifest
-    package="jp.co.recruit.floatingview"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="jp.co.recruit.floatingview">
 
 
     <!-- 最前面表示時のパーミッション -->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- Foreground Service permission(API level 28 or higher) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
-
+        
         <activity
             android:name="jp.co.recruit_lifestyle.sample.MainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <!-- デモ画面 -->
@@ -25,15 +27,15 @@
             android:name="jp.co.recruit_lifestyle.sample.DeleteActionActivity"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
-            android:taskAffinity="jp.co.recruit.floatingview.ChatHeadActivity"/>
+            android:taskAffinity="jp.co.recruit.floatingview.ChatHeadActivity" />
         <!-- デモ表示サービス -->
         <service
             android:name="jp.co.recruit_lifestyle.sample.service.ChatHeadService"
-            android:exported="false"/>
+            android:exported="false" />
         <!-- カスタムデモ表示サービス -->
         <service
             android:name="jp.co.recruit_lifestyle.sample.service.CustomFloatingViewService"
-            android:exported="false"/>
+            android:exported="false" />
 
     </application>
 
