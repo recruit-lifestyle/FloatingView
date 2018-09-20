@@ -1,17 +1,17 @@
 package jp.co.recruit_lifestyle.sample;
 
-import android.app.Activity;
-import android.app.FragmentTransaction;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 
 import jp.co.recruit.floatingview.R;
 import jp.co.recruit_lifestyle.sample.fragment.FloatingViewControlFragment;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +30,7 @@ public class MainActivity extends Activity {
         }
 
         if (savedInstanceState == null) {
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.add(R.id.container, FloatingViewControlFragment.newInstance());
             ft.commit();
         }

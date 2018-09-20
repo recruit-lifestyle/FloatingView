@@ -2,14 +2,14 @@ package jp.co.recruit_lifestyle.sample.fragment;
 
 
 import android.os.Bundle;
-import android.support.v14.preference.PreferenceFragment;
+import android.support.v7.preference.PreferenceFragmentCompat;
 
 import jp.co.recruit.floatingview.R;
 
 /**
  * FloatingViewの設定を行います。
  */
-public class FloatingViewSettingsFragment extends PreferenceFragment {
+public class FloatingViewSettingsFragment extends PreferenceFragmentCompat {
 
     /**
      * FloatingViewSettingsFragmentを生成します。
