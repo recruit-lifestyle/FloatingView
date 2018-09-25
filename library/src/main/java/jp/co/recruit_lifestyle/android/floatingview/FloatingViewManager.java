@@ -604,7 +604,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
 
         return safeInsetRect;
     }
-    
+
     /**
      * FloatingViewを貼り付ける際のオプションを表すクラスです。
      */

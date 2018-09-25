@@ -292,7 +292,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private int mStatusBarHeight;
 
     /**
-     * Navigation bar's height(portlait)
+     * Navigation bar's height(portrait)
      */
     private final int mBaseNavigationBarHeight;
 
