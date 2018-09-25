@@ -16,6 +16,7 @@
 
 package jp.co.recruit_lifestyle.android.floatingview;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -24,7 +25,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
 import android.util.DisplayMetrics;
+import android.view.DisplayCutout;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
@@ -439,13 +442,13 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         mDisplayMode = displayMode;
         // 常に表示/フルスクリーン時に非表示にするモードの場合
         if (mDisplayMode == DISPLAY_MODE_SHOW_ALWAYS || mDisplayMode == DISPLAY_MODE_HIDE_FULLSCREEN) {
-            for (FloatingView floatingView: mFloatingViewList) {
+            for (FloatingView floatingView : mFloatingViewList) {
                 floatingView.setVisibility(View.VISIBLE);
             }
         }
         // 常に非表示にするモードの場合
         else if (mDisplayMode == DISPLAY_MODE_HIDE_ALWAYS) {
-            for (FloatingView floatingView: mFloatingViewList) {
+            for (FloatingView floatingView : mFloatingViewList) {
                 floatingView.setVisibility(View.GONE);
             }
             mTrashView.dismiss();
@@ -579,6 +582,29 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         mFloatingViewList.clear();
     }
 
+    /**
+     * Find the safe area of DisplayCutout.
+     *
+     * @param activity {@link Activity} (Portrait and `windowLayoutInDisplayCutoutMode` != never)
+     * @return Safe cutout insets.
+     */
+    public static Rect findCutoutSafeArea(@NonNull Activity activity) {
+        final Rect safeInsetRect = new Rect();
+        // TODO:Rewrite with android-x
+        // TODO:Consider alternatives
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            return safeInsetRect;
+        }
+
+        // set safeInsetRect
+        final DisplayCutout displayCutout = activity.getWindow().getDecorView().getRootWindowInsets().getDisplayCutout();
+        if (displayCutout != null) {
+            safeInsetRect.set(displayCutout.getSafeInsetLeft(), displayCutout.getSafeInsetTop(), displayCutout.getSafeInsetRight(), displayCutout.getSafeInsetBottom());
+        }
+
+        return safeInsetRect;
+    }
+    
     /**
      * FloatingViewを貼り付ける際のオプションを表すクラスです。
      */

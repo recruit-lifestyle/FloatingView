@@ -123,25 +123,17 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
 9) Add DisplayCutout process(API Level >= 28)
 
-Note: `DisplayCutout` is obtained from `Fragment` or `Activity` (You can not get `DisplayCutout` from `Service`)  
-Note: You must set the `DisplayCutout` obtained on portrait orientation.  
-Note: You must not set `windowLayoutInDisplayCutoutMode` to `never` when getting a `DisplayCutout`.
+Call `FloatingViewManager.findCutoutSafeArea(activity)`.  
+Note: Activity must be portrait oriented.  
+Note: You must not set `windowLayoutInDisplayCutoutMode` to `never`.  
 
 example)
 
 - FloatingViewControlFragment.java
 
 ```java
-final Rect safeInsetRect = new Rect();
-if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-    final DisplayCutout displayCutout = activity.getWindow().getDecorView().getRootWindowInsets().getDisplayCutout();
-    if (displayCutout != null) {
-        safeInsetRect.set(displayCutout.getSafeInsetLeft(), displayCutout.getSafeInsetTop(), displayCutout.getSafeInsetRight(), displayCutout.getSafeInsetBottom());
-    }
-}
-
 final Intent intent = new Intent(activity, ChatHeadService.class);
-intent.putExtra(ChatHeadService.EXTRA_CUTOUT_SAFE_AREA, safeInsetRect);
+intent.putExtra(ChatHeadService.EXTRA_CUTOUT_SAFE_AREA, FloatingViewManager.findCutoutSafeArea(activity));
 ContextCompat.startForegroundService(activity, intent);
 ```
 
