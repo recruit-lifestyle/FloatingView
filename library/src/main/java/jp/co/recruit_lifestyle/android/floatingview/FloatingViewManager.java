@@ -241,7 +241,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         }
 
         // detect navigation bar
-        final boolean isHideNavigationBar;
+        boolean isHideNavigationBar;
         if (visibility == FullscreenObserverView.NO_LAST_VISIBILITY) {
             // At the first it can not get the correct value, so do special processing
             mWindowManager.getDefaultDisplay().getMetrics(mDisplayMetrics);
@@ -249,8 +249,14 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         } else {
             isHideNavigationBar = (visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
         }
-        final boolean isPortrait = mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+        // auto dismiss navigation bar mode(Galaxy S8, S9 and so on.)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            final DisplayMetrics realMetrics = new DisplayMetrics();
+            mWindowManager.getDefaultDisplay().getRealMetrics(realMetrics);
+            isHideNavigationBar = isHideNavigationBar || windowRect.bottom - realMetrics.heightPixels == 0;
+        }
 
+        final boolean isPortrait = mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
         // update FloatingView layout
         mTargetFloatingView.onUpdateSystemLayout(isHideStatusBar, isHideNavigationBar, isPortrait, windowRect.left);
 
