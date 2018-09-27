@@ -251,9 +251,9 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         }
         // auto dismiss navigation bar mode(Galaxy S8, S9 and so on.)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            final DisplayMetrics realMetrics = new DisplayMetrics();
-            mWindowManager.getDefaultDisplay().getRealMetrics(realMetrics);
-            isHideNavigationBar = isHideNavigationBar || windowRect.bottom - realMetrics.heightPixels == 0;
+            final DisplayMetrics realDisplayMetrics = new DisplayMetrics();
+            mWindowManager.getDefaultDisplay().getRealMetrics(realDisplayMetrics);
+            isHideNavigationBar = isHideNavigationBar || windowRect.bottom - realDisplayMetrics.heightPixels == 0;
         }
 
         final boolean isPortrait = mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
