@@ -284,7 +284,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     /**
      * status bar's height(landscape)
      */
-    private int mBaseStatusBarRotatedHeight;
+    private final int mBaseStatusBarRotatedHeight;
 
     /**
      * Current status bar's height
