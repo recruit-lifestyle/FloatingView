@@ -639,15 +639,17 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @param windowRect          {@link Rect} of system window
      */
     private void updateNavigationBarOffset(boolean isHideNavigationBar, boolean isPortrait, Rect windowRect) {
-        int currentNavigationBarVerticalHeight = 0;
+        int currentNavigationBarHeight = 0;
+        int currentNavigationBarWidth = 0;
         int navigationBarVerticalDiff = 0;
         final boolean hasSoftNavigationBar = hasSoftNavigationBar();
         // auto hide navigation bar(Galaxy S8, S9 and so on.)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             final DisplayMetrics realDisplayMetrics = new DisplayMetrics();
             mWindowManager.getDefaultDisplay().getRealMetrics(realDisplayMetrics);
-            currentNavigationBarVerticalHeight = realDisplayMetrics.heightPixels - windowRect.bottom;
-            navigationBarVerticalDiff = mBaseNavigationBarHeight - currentNavigationBarVerticalHeight;
+            currentNavigationBarHeight = realDisplayMetrics.heightPixels - windowRect.bottom;
+            currentNavigationBarWidth = realDisplayMetrics.widthPixels - mMetrics.widthPixels;
+            navigationBarVerticalDiff = mBaseNavigationBarHeight - currentNavigationBarHeight;
         }
 
         if (!isHideNavigationBar) {
@@ -663,7 +665,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
                     mNavigationBarVerticalOffset = 0;
                 } else {
                     // show mode -> home
-                    mNavigationBarVerticalOffset = -currentNavigationBarVerticalHeight;
+                    mNavigationBarVerticalOffset = -currentNavigationBarHeight;
                 }
             } else {
                 // normal device
@@ -693,7 +695,17 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             mNavigationBarHorizontalOffset = 0;
         } else {
             mNavigationBarVerticalOffset = 0;
-            mNavigationBarHorizontalOffset = mBaseNavigationBarRotatedHeight;
+            // auto hide navigation bar
+            // 他デバイスとの矛盾をもとに推測する
+            // 1.デバイスに組み込まれたナビゲーションバー(!hasSoftNavigationBar)は、意図的にBaseを0にしているので、矛盾している
+            if (!hasSoftNavigationBar && mBaseNavigationBarRotatedHeight != 0) {
+                mNavigationBarHorizontalOffset = 0;
+            } else if (hasSoftNavigationBar && mBaseNavigationBarRotatedHeight == 0) {
+                // 2.ソフトナビゲーションバーの場合、Baseが設定されるため矛盾している
+                mNavigationBarHorizontalOffset = currentNavigationBarWidth;
+            } else {
+                mNavigationBarHorizontalOffset = mBaseNavigationBarRotatedHeight;
+            }
         }
     }
 
