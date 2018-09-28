@@ -241,19 +241,18 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         }
 
         // detect navigation bar
-        boolean isHideNavigationBar;
+        final boolean isHideNavigationBar;
         if (visibility == FullscreenObserverView.NO_LAST_VISIBILITY) {
             // At the first it can not get the correct value, so do special processing
-            mWindowManager.getDefaultDisplay().getMetrics(mDisplayMetrics);
-            isHideNavigationBar = windowRect.width() - mDisplayMetrics.widthPixels > 0 || windowRect.height() - mDisplayMetrics.heightPixels > 0;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                mWindowManager.getDefaultDisplay().getRealMetrics(mDisplayMetrics);
+                isHideNavigationBar = windowRect.width() - mDisplayMetrics.widthPixels == 0 && windowRect.bottom - mDisplayMetrics.heightPixels == 0;
+            } else {
+                mWindowManager.getDefaultDisplay().getMetrics(mDisplayMetrics);
+                isHideNavigationBar = windowRect.width() - mDisplayMetrics.widthPixels > 0 || windowRect.height() - mDisplayMetrics.heightPixels > 0;
+            }
         } else {
             isHideNavigationBar = (visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-        }
-        // auto dismiss navigation bar mode(Galaxy S8, S9 and so on.)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            final DisplayMetrics realDisplayMetrics = new DisplayMetrics();
-            mWindowManager.getDefaultDisplay().getRealMetrics(realDisplayMetrics);
-            isHideNavigationBar = isHideNavigationBar || windowRect.bottom - realDisplayMetrics.heightPixels == 0;
         }
 
         final boolean isPortrait = mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
@@ -445,13 +444,13 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         mDisplayMode = displayMode;
         // 常に表示/フルスクリーン時に非表示にするモードの場合
         if (mDisplayMode == DISPLAY_MODE_SHOW_ALWAYS || mDisplayMode == DISPLAY_MODE_HIDE_FULLSCREEN) {
-            for (FloatingView floatingView: mFloatingViewList) {
+            for (FloatingView floatingView : mFloatingViewList) {
                 floatingView.setVisibility(View.VISIBLE);
             }
         }
         // 常に非表示にするモードの場合
         else if (mDisplayMode == DISPLAY_MODE_HIDE_ALWAYS) {
-            for (FloatingView floatingView: mFloatingViewList) {
+            for (FloatingView floatingView : mFloatingViewList) {
                 floatingView.setVisibility(View.GONE);
             }
             mTrashView.dismiss();
