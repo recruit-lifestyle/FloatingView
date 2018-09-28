@@ -2,8 +2,6 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 28
-    buildToolsVersion '28.0.2'
-
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 28
@@ -13,9 +11,9 @@ android {
 }
 
 dependencies {
-    implementation 'com.android.support:support-annotations:28.0.0-rc02'
-    implementation 'com.android.support:support-compat:28.0.0-rc02'
-    implementation 'com.android.support:support-dynamic-animation:28.0.0-rc02'
+    implementation 'com.android.support:support-annotations:28.0.0'
+    implementation 'com.android.support:support-compat:28.0.0'
+    implementation 'com.android.support:support-dynamic-animation:28.0.0'
 }
 
 // build a jar with source files
@@ -25,7 +23,7 @@ task sourcesJar(type: Jar) {
 }
 
 task javadoc(type: Javadoc) {
-    failOnError  false
+    failOnError false
     source = android.sourceSets.main.java.sourceFiles
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
 }

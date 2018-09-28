@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,13 +14,13 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.view.DisplayCutout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import jp.co.recruit.floatingview.R;
+import jp.co.recruit_lifestyle.android.floatingview.FloatingViewManager;
 import jp.co.recruit_lifestyle.sample.service.ChatHeadService;
 import jp.co.recruit_lifestyle.sample.service.CustomFloatingViewService;
 
@@ -143,35 +142,26 @@ public class FloatingViewControlFragment extends Fragment {
      * @param isCustomFloatingView If true, it launches CustomFloatingViewService.
      */
     private static void startFloatingViewService(Activity activity, boolean isCustomFloatingView) {
-        // set safe inset area
-        final Rect safeInsetRect = new Rect();
-        // TODO:Rewrite with android-x
-        // TODO:Consider alternatives
+        // *** You must follow these rules when obtain the cutout(FloatingViewManager.findCutoutSafeArea) ***
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            final DisplayCutout displayCutout = activity.getWindow().getDecorView().getRootWindowInsets().getDisplayCutout();
-            if (displayCutout != null) {
-                safeInsetRect.set(displayCutout.getSafeInsetLeft(), displayCutout.getSafeInsetTop(), displayCutout.getSafeInsetRight(), displayCutout.getSafeInsetBottom());
-
-                // *** You must follow these rules when obtain the cutout ***
-                // 1. 'windowLayoutInDisplayCutoutMode' do not be set to 'never'
-                if (activity.getWindow().getAttributes().layoutInDisplayCutoutMode == WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER) {
-                    throw new RuntimeException("'windowLayoutInDisplayCutoutMode' do not be set to 'never'");
-                }
-                // 2. Do not set Activity to landscape
-                if(activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
-                    throw new RuntimeException("Do not set Activity to landscape");
-                }
+            // 1. 'windowLayoutInDisplayCutoutMode' do not be set to 'never'
+            if (activity.getWindow().getAttributes().layoutInDisplayCutoutMode == WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER) {
+                throw new RuntimeException("'windowLayoutInDisplayCutoutMode' do not be set to 'never'");
+            }
+            // 2. Do not set Activity to landscape
+            if (activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                throw new RuntimeException("Do not set Activity to landscape");
             }
         }
 
         // launch service
         if (isCustomFloatingView) {
             final Intent intent = new Intent(activity, CustomFloatingViewService.class);
-            intent.putExtra(CustomFloatingViewService.EXTRA_CUTOUT_SAFE_AREA, safeInsetRect);
+            intent.putExtra(CustomFloatingViewService.EXTRA_CUTOUT_SAFE_AREA, FloatingViewManager.findCutoutSafeArea(activity));
             ContextCompat.startForegroundService(activity, intent);
         } else {
             final Intent intent = new Intent(activity, ChatHeadService.class);
-            intent.putExtra(ChatHeadService.EXTRA_CUTOUT_SAFE_AREA, safeInsetRect);
+            intent.putExtra(ChatHeadService.EXTRA_CUTOUT_SAFE_AREA, FloatingViewManager.findCutoutSafeArea(activity));
             ContextCompat.startForegroundService(activity, intent);
         }
     }
