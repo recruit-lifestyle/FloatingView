@@ -247,15 +247,20 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         final boolean isHideNavigationBar;
         if (visibility == FullscreenObserverView.NO_LAST_VISIBILITY) {
             // At the first it can not get the correct value, so do special processing
-            mWindowManager.getDefaultDisplay().getMetrics(mDisplayMetrics);
-            isHideNavigationBar = windowRect.width() - mDisplayMetrics.widthPixels > 0 || windowRect.height() - mDisplayMetrics.heightPixels > 0;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                mWindowManager.getDefaultDisplay().getRealMetrics(mDisplayMetrics);
+                isHideNavigationBar = windowRect.width() - mDisplayMetrics.widthPixels == 0 && windowRect.bottom - mDisplayMetrics.heightPixels == 0;
+            } else {
+                mWindowManager.getDefaultDisplay().getMetrics(mDisplayMetrics);
+                isHideNavigationBar = windowRect.width() - mDisplayMetrics.widthPixels > 0 || windowRect.height() - mDisplayMetrics.heightPixels > 0;
+            }
         } else {
             isHideNavigationBar = (visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
         }
-        final boolean isPortrait = mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
+        final boolean isPortrait = mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
         // update FloatingView layout
-        mTargetFloatingView.onUpdateSystemLayout(isHideStatusBar, isHideNavigationBar, isPortrait, windowRect.left);
+        mTargetFloatingView.onUpdateSystemLayout(isHideStatusBar, isHideNavigationBar, isPortrait, windowRect);
 
         // フルスクリーンでの非表示モードでない場合は何もしない
         if (mDisplayMode != DISPLAY_MODE_HIDE_FULLSCREEN) {
