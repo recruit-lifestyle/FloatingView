@@ -568,17 +568,17 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @param isHideStatusBar     If true, the status bar is hidden
      * @param isHideNavigationBar If true, the navigation bar is hidden
      * @param isPortrait          If true, the device orientation is portrait
-     * @param windowLeftOffset    Left side offset of device display
+     * @param windowRect          {@link Rect} of system window
      */
-    void onUpdateSystemLayout(boolean isHideStatusBar, boolean isHideNavigationBar, boolean isPortrait, int windowLeftOffset) {
+    void onUpdateSystemLayout(boolean isHideStatusBar, boolean isHideNavigationBar, boolean isPortrait, Rect windowRect) {
         // status bar
         updateStatusBarHeight(isHideStatusBar, isPortrait);
         // touch X offset(support Cutout)
-        updateTouchXOffset(isHideNavigationBar, windowLeftOffset);
+        updateTouchXOffset(isHideNavigationBar, windowRect.left);
         // touch Y offset(support Cutout)
         mTouchYOffset = isPortrait ? mSafeInsetRect.top : 0;
         // navigation bar
-        updateNavigationBarOffset(isHideNavigationBar, isPortrait);
+        updateNavigationBarOffset(isHideNavigationBar, isPortrait, windowRect);
         refreshLimitRect();
     }
 
@@ -636,17 +636,52 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      *
      * @param isHideNavigationBar If true, the navigation bar is hidden
      * @param isPortrait          If true, the device orientation is portrait
+     * @param windowRect          {@link Rect} of system window
      */
-    private void updateNavigationBarOffset(boolean isHideNavigationBar, boolean isPortrait) {
+    private void updateNavigationBarOffset(boolean isHideNavigationBar, boolean isPortrait, Rect windowRect) {
+        int currentNavigationBarVerticalHeight = 0;
+        int navigationBarVerticalDiff = 0;
+        final boolean hasSoftNavigationBar = hasSoftNavigationBar();
+        // auto hide navigation bar(Galaxy S8, S9 and so on.)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            final DisplayMetrics realDisplayMetrics = new DisplayMetrics();
+            mWindowManager.getDefaultDisplay().getRealMetrics(realDisplayMetrics);
+            currentNavigationBarVerticalHeight = realDisplayMetrics.heightPixels - windowRect.bottom;
+            navigationBarVerticalDiff = mBaseNavigationBarHeight - currentNavigationBarVerticalHeight;
+        }
+
         if (!isHideNavigationBar) {
-            mNavigationBarVerticalOffset = 0;
+            // auto hide navigation bar
+            // 他デバイスとの矛盾をもとに推測する
+            // 1.デバイスに組み込まれたナビゲーションバー（mBaseNavigationBarHeight == 0）はシステムの状態によって高さに差が発生しない
+            // 2.デバイスに組み込まれたナビゲーションバー(!hasSoftNavigationBar)は意図的にBaseを0にしているので、矛盾している
+            if (navigationBarVerticalDiff != 0 && mBaseNavigationBarHeight == 0 ||
+                    !hasSoftNavigationBar && mBaseNavigationBarHeight != 0) {
+                if (hasSoftNavigationBar) {
+                    // 1.auto hide mode -> show mode
+                    // 2.show mode -> auto hide mode -> home
+                    mNavigationBarVerticalOffset = 0;
+                } else {
+                    // show mode -> home
+                    mNavigationBarVerticalOffset = -currentNavigationBarVerticalHeight;
+                }
+            } else {
+                // normal device
+                mNavigationBarVerticalOffset = 0;
+            }
+
             mNavigationBarHorizontalOffset = 0;
             return;
         }
 
         // If the portrait, is displayed at the bottom of the screen
         if (isPortrait) {
-            mNavigationBarVerticalOffset = mBaseNavigationBarHeight;
+            // auto hide navigation bar
+            if (!hasSoftNavigationBar && mBaseNavigationBarHeight != 0) {
+                mNavigationBarVerticalOffset = 0;
+            } else {
+                mNavigationBarVerticalOffset = mBaseNavigationBarHeight;
+            }
             mNavigationBarHorizontalOffset = 0;
             return;
         }
