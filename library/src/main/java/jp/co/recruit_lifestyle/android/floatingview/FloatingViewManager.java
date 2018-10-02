@@ -26,6 +26,7 @@ import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
+import android.support.v4.view.ViewCompat;
 import android.util.DisplayMetrics;
 import android.view.DisplayCutout;
 import android.view.HapticFeedbackConstants;
@@ -544,7 +545,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             mWindowManager.addView(mFullscreenObserverView, mFullscreenObserverView.getWindowLayoutParams());
             mTargetFloatingView = floatingView;
         } else {
-            mWindowManager.removeViewImmediate(mTrashView);
+            removeViewImmediate(mTrashView);
         }
         // 必ずトップに来て欲しいので毎回貼り付け
         mWindowManager.addView(mTrashView, mTrashView.getWindowLayoutParams());
@@ -559,7 +560,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         final int matchIndex = mFloatingViewList.indexOf(floatingView);
         // 見つかった場合は表示とリストから削除
         if (matchIndex != -1) {
-            mWindowManager.removeViewImmediate(floatingView);
+            removeViewImmediate(floatingView);
             mFloatingViewList.remove(matchIndex);
         }
 
@@ -576,15 +577,27 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      * ViewをWindowから全て取り外します。
      */
     public void removeAllViewToWindow() {
-        mWindowManager.removeViewImmediate(mFullscreenObserverView);
-        mWindowManager.removeViewImmediate(mTrashView);
+        removeViewImmediate(mFullscreenObserverView);
+        removeViewImmediate(mTrashView);
         // FloatingViewの削除
         final int size = mFloatingViewList.size();
         for (int i = 0; i < size; i++) {
             final FloatingView floatingView = mFloatingViewList.get(i);
-            mWindowManager.removeViewImmediate(floatingView);
+            removeViewImmediate(floatingView);
         }
         mFloatingViewList.clear();
+    }
+
+    /**
+     * Safely remove the View (issue #89)
+     *
+     * @param view {@link View}
+     */
+    private void removeViewImmediate(View view) {
+        if (!ViewCompat.isAttachedToWindow(view)) {
+            return;
+        }
+        mWindowManager.removeViewImmediate(view);
     }
 
     /**
