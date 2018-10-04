@@ -622,13 +622,15 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @param windowLeftOffset    Left side offset of device display
      */
     private void updateTouchXOffset(boolean isHideNavigationBar, int windowLeftOffset) {
-        final boolean noBottomCutout = mSafeInsetRect.bottom == 0;
-        if (noBottomCutout) {
-            // touch X offset(navigation bar is displayed and it is on the left side of the device)
-            mTouchXOffset = !isHideNavigationBar && windowLeftOffset > 0 ? mBaseNavigationBarRotatedHeight : 0;
-        } else {
+        final boolean hasBottomCutout = mSafeInsetRect.bottom != 0;
+        if (hasBottomCutout) {
             mTouchXOffset = windowLeftOffset;
+            return;
         }
+
+        // No cutout
+        // touch X offset(navigation bar is displayed and it is on the left side of the device)
+        mTouchXOffset = !isHideNavigationBar && windowLeftOffset > 0 ? mBaseNavigationBarRotatedHeight : 0;
     }
 
     /**
