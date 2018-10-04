@@ -156,9 +156,17 @@ public class FloatingViewControlFragment extends Fragment {
         }
 
         // launch service
-        final Class<? extends Service> service = isCustomFloatingView ? CustomFloatingViewService.class : ChatHeadService.class;
+        final Class<? extends Service> service;
+        final String key;
+        if (isCustomFloatingView) {
+            service = CustomFloatingViewService.class;
+            key = CustomFloatingViewService.EXTRA_CUTOUT_SAFE_AREA;
+        } else {
+            service = ChatHeadService.class;
+            key = ChatHeadService.EXTRA_CUTOUT_SAFE_AREA;
+        }
         final Intent intent = new Intent(activity, service);
-        intent.putExtra(CustomFloatingViewService.EXTRA_CUTOUT_SAFE_AREA, FloatingViewManager.findCutoutSafeArea(activity));
+        intent.putExtra(key, FloatingViewManager.findCutoutSafeArea(activity));
         ContextCompat.startForegroundService(activity, intent);
     }
 }
