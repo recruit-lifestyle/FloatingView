@@ -16,6 +16,7 @@
 
 package jp.co.recruit_lifestyle.android.floatingview;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -24,7 +25,10 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
+import android.support.v4.view.ViewCompat;
 import android.util.DisplayMetrics;
+import android.view.DisplayCutout;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
@@ -175,6 +179,11 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
     private int mDisplayMode;
 
     /**
+     * Cutout safe inset rect
+     */
+    private final Rect mSafeInsetRect;
+
+    /**
      * Windowに貼り付けられたFloatingViewのリスト
      * TODO:第2弾のFloatingViewの複数表示で意味を発揮する予定
      */
@@ -196,6 +205,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         mTrashViewRect = new Rect();
         mIsMoveAccept = false;
         mDisplayMode = DISPLAY_MODE_HIDE_FULLSCREEN;
+        mSafeInsetRect = new Rect();
 
         // FloatingViewと連携するViewの構築
         mFloatingViewList = new ArrayList<>();
@@ -238,18 +248,20 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         final boolean isHideNavigationBar;
         if (visibility == FullscreenObserverView.NO_LAST_VISIBILITY) {
             // At the first it can not get the correct value, so do special processing
-            mWindowManager.getDefaultDisplay().getMetrics(mDisplayMetrics);
-            isHideNavigationBar = windowRect.width() - mDisplayMetrics.widthPixels > 0 || windowRect.height() - mDisplayMetrics.heightPixels > 0;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                mWindowManager.getDefaultDisplay().getRealMetrics(mDisplayMetrics);
+                isHideNavigationBar = windowRect.width() - mDisplayMetrics.widthPixels == 0 && windowRect.bottom - mDisplayMetrics.heightPixels == 0;
+            } else {
+                mWindowManager.getDefaultDisplay().getMetrics(mDisplayMetrics);
+                isHideNavigationBar = windowRect.width() - mDisplayMetrics.widthPixels > 0 || windowRect.height() - mDisplayMetrics.heightPixels > 0;
+            }
         } else {
             isHideNavigationBar = (visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
         }
+
         final boolean isPortrait = mResources.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-
-        // touch X offset(navigation bar is on the left side)
-        final boolean hasTouchXOffset = windowRect.left > 0;
-
         // update FloatingView layout
-        mTargetFloatingView.onUpdateSystemLayout(isHideStatusBar, isHideNavigationBar, isPortrait, hasTouchXOffset);
+        mTargetFloatingView.onUpdateSystemLayout(isHideStatusBar, isHideNavigationBar, isPortrait, windowRect);
 
         // フルスクリーンでの非表示モードでない場合は何もしない
         if (mDisplayMode != DISPLAY_MODE_HIDE_FULLSCREEN) {
@@ -468,6 +480,33 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
     }
 
     /**
+     * Set the DisplayCutout's safe area
+     * Note:You must set the Cutout obtained on portrait orientation.
+     *
+     * @param safeInsetRect DisplayCutout#getSafeInsetXXX
+     */
+    public void setSafeInsetRect(Rect safeInsetRect) {
+        if (safeInsetRect == null) {
+            mSafeInsetRect.setEmpty();
+        } else {
+            mSafeInsetRect.set(safeInsetRect);
+        }
+
+        final int size = mFloatingViewList.size();
+        if (size == 0) {
+            return;
+        }
+
+        // update floating view
+        for (int i = 0; i < size; i++) {
+            final FloatingView floatingView = mFloatingViewList.get(i);
+            floatingView.setSafeInsetRect(mSafeInsetRect);
+        }
+        // dirty hack
+        mFullscreenObserverView.onGlobalLayout();
+    }
+
+    /**
      * ViewをWindowに貼り付けます。
      *
      * @param view    フローティングさせるView
@@ -484,6 +523,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         floatingView.setMoveDirection(options.moveDirection);
         floatingView.usePhysics(options.usePhysics);
         floatingView.setAnimateInitialMove(options.animateInitialMove);
+        floatingView.setSafeInsetRect(mSafeInsetRect);
 
         // set FloatingView size
         final FrameLayout.LayoutParams targetParams = new FrameLayout.LayoutParams(options.floatingViewWidth, options.floatingViewHeight);
@@ -505,7 +545,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             mWindowManager.addView(mFullscreenObserverView, mFullscreenObserverView.getWindowLayoutParams());
             mTargetFloatingView = floatingView;
         } else {
-            mWindowManager.removeViewImmediate(mTrashView);
+            removeViewImmediate(mTrashView);
         }
         // 必ずトップに来て欲しいので毎回貼り付け
         mWindowManager.addView(mTrashView, mTrashView.getWindowLayoutParams());
@@ -520,7 +560,7 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
         final int matchIndex = mFloatingViewList.indexOf(floatingView);
         // 見つかった場合は表示とリストから削除
         if (matchIndex != -1) {
-            mWindowManager.removeViewImmediate(floatingView);
+            removeViewImmediate(floatingView);
             mFloatingViewList.remove(matchIndex);
         }
 
@@ -537,15 +577,50 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      * ViewをWindowから全て取り外します。
      */
     public void removeAllViewToWindow() {
-        mWindowManager.removeViewImmediate(mFullscreenObserverView);
-        mWindowManager.removeViewImmediate(mTrashView);
+        removeViewImmediate(mFullscreenObserverView);
+        removeViewImmediate(mTrashView);
         // FloatingViewの削除
         final int size = mFloatingViewList.size();
         for (int i = 0; i < size; i++) {
             final FloatingView floatingView = mFloatingViewList.get(i);
-            mWindowManager.removeViewImmediate(floatingView);
+            removeViewImmediate(floatingView);
         }
         mFloatingViewList.clear();
+    }
+
+    /**
+     * Safely remove the View (issue #89)
+     *
+     * @param view {@link View}
+     */
+    private void removeViewImmediate(View view) {
+        if (!ViewCompat.isAttachedToWindow(view)) {
+            return;
+        }
+        mWindowManager.removeViewImmediate(view);
+    }
+
+    /**
+     * Find the safe area of DisplayCutout.
+     *
+     * @param activity {@link Activity} (Portrait and `windowLayoutInDisplayCutoutMode` != never)
+     * @return Safe cutout insets.
+     */
+    public static Rect findCutoutSafeArea(@NonNull Activity activity) {
+        final Rect safeInsetRect = new Rect();
+        // TODO:Rewrite with android-x
+        // TODO:Consider alternatives
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            return safeInsetRect;
+        }
+
+        // set safeInsetRect
+        final DisplayCutout displayCutout = activity.getWindow().getDecorView().getRootWindowInsets().getDisplayCutout();
+        if (displayCutout != null) {
+            safeInsetRect.set(displayCutout.getSafeInsetLeft(), displayCutout.getSafeInsetTop(), displayCutout.getSafeInsetRight(), displayCutout.getSafeInsetBottom());
+        }
+
+        return safeInsetRect;
     }
 
     /**

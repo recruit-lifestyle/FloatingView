@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -28,6 +29,11 @@ import jp.co.recruit_lifestyle.sample.DeleteActionActivity;
  * サンプルとしてクリック時にはメールアプリを起動します。
  */
 public class CustomFloatingViewService extends Service implements FloatingViewListener {
+
+    /**
+     * Intent key (Cutout safe area)
+     */
+    public static final String EXTRA_CUTOUT_SAFE_AREA = "cutout_safe_area";
 
     /**
      * 通知ID
@@ -79,6 +85,7 @@ public class CustomFloatingViewService extends Service implements FloatingViewLi
         mFloatingViewManager = new FloatingViewManager(this, this);
         mFloatingViewManager.setFixedTrashIconImage(R.drawable.ic_trash_fixed);
         mFloatingViewManager.setActionTrashIconImage(R.drawable.ic_trash_action);
+        mFloatingViewManager.setSafeInsetRect((Rect) intent.getParcelableExtra(EXTRA_CUTOUT_SAFE_AREA));
         // Setting Options(you can change options at any time)
         loadDynamicOptions();
         // Initial Setting Options (you can't change options after created.)

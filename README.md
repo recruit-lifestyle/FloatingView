@@ -1,6 +1,6 @@
 # FloatingView
 The Android project is View to display information such as chat in front.  
-To API Level 14 or later are supported  
+To API Level 14 or higher are supported
 
 ## Screenshots
 ![](./screenshot/animation.gif)  
@@ -12,7 +12,7 @@ To API Level 14 or later are supported
 [SimpleFloating](http://youtu.be/nb8M2p0agF4)
 
 ## Requirements
-Target Sdk Version : 27  
+Target Sdk Version : 28  
 Min Sdk Version : 14  
 
 ## How to use
@@ -66,6 +66,7 @@ Describe the process (`onFinishFloatingView`) that is called when you exit the F
 5) Add the permission to AndroidManifest
 ```xml
  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+ <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 ```  
   
 6) Define the Service to AndroidManifest
@@ -83,9 +84,25 @@ example)
 ```
   
 7) Describe the process to start the Service (run on foreground)
+
+
+example)  
+
+- FloatingViewControlFragment.java  
+
 ```java
     final Intent intent = new Intent(activity, ChatHeadService.class);
     ContextCompat.startForegroundService(activity, intent);
+```
+
+- ChatHeadService.java  
+
+```java
+public int onStartCommand(Intent intent, int flags, int startId) {
+    ...
+    startForeground(NOTIFICATION_ID, createNotification(this));
+    ...
+}
 ```
 
 8) Create notification channel (targetSdkVersion >= 26)
@@ -103,6 +120,29 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 }
 
 ```
+
+9) Add DisplayCutout process(API Level >= 28)
+
+Call `FloatingViewManager.findCutoutSafeArea(activity)`.  
+Note: Activity must be portrait oriented.  
+Note: You must not set `windowLayoutInDisplayCutoutMode` to `never`.  
+
+example)
+
+- FloatingViewControlFragment.java
+
+```java
+final Intent intent = new Intent(activity, ChatHeadService.class);
+intent.putExtra(ChatHeadService.EXTRA_CUTOUT_SAFE_AREA, FloatingViewManager.findCutoutSafeArea(activity));
+ContextCompat.startForegroundService(activity, intent);
+```
+
+- ChatHeadService.java
+
+```java
+mFloatingViewManager.setSafeInsetRect((Rect) intent.getParcelableExtra(EXTRA_CUTOUT_SAFE_AREA));
+```
+
 
 ## Static Options
 It can be set only when displaying for the first time

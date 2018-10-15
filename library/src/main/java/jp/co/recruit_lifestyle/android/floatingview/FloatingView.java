@@ -277,9 +277,14 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private boolean mAnimateInitialMove;
 
     /**
-     * ステータスバーの高さ
+     * status bar's height
      */
     private final int mBaseStatusBarHeight;
+
+    /**
+     * status bar's height(landscape)
+     */
+    private final int mBaseStatusBarRotatedHeight;
 
     /**
      * Current status bar's height
@@ -287,7 +292,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
     private int mStatusBarHeight;
 
     /**
-     * Navigation bar's height(portlait)
+     * Navigation bar's height(portrait)
      */
     private final int mBaseNavigationBarHeight;
 
@@ -312,6 +317,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * Offset of touch X coordinate
      */
     private int mTouchXOffset;
+
+    /**
+     * Offset of touch Y coordinate
+     */
+    private int mTouchYOffset;
 
     /**
      * 左・右端に寄せるアニメーション
@@ -388,6 +398,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      */
     private int mRotation;
 
+    /**
+     * Cutout safe inset rect(Same as FloatingViewManager's mSafeInsetRect)
+     */
+    private final Rect mSafeInsetRect;
+
     static {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N_MR1) {
             OVERLAY_TYPE = WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
@@ -427,10 +442,17 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
 
         mMoveLimitRect = new Rect();
         mPositionLimitRect = new Rect();
+        mSafeInsetRect = new Rect();
 
         // ステータスバーの高さを取得
         mBaseStatusBarHeight = getSystemUiDimensionPixelSize(resources, "status_bar_height");
-        mStatusBarHeight = mBaseStatusBarHeight;
+        // Check landscape resource id
+        final int statusBarLandscapeResId = resources.getIdentifier("status_bar_height_landscape", "dimen", "android");
+        if (statusBarLandscapeResId > 0) {
+            mBaseStatusBarRotatedHeight = getSystemUiDimensionPixelSize(resources, "status_bar_height_landscape");
+        } else {
+            mBaseStatusBarRotatedHeight = mBaseStatusBarHeight;
+        }
 
         // Init physics-based animation properties
         updateViewConfiguration();
@@ -546,16 +568,69 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @param isHideStatusBar     If true, the status bar is hidden
      * @param isHideNavigationBar If true, the navigation bar is hidden
      * @param isPortrait          If true, the device orientation is portrait
-     * @param hasTouchXOffset     If true, offset is required for touched X coordinate
+     * @param windowRect          {@link Rect} of system window
      */
-    void onUpdateSystemLayout(boolean isHideStatusBar, boolean isHideNavigationBar, boolean isPortrait, boolean hasTouchXOffset) {
+    void onUpdateSystemLayout(boolean isHideStatusBar, boolean isHideNavigationBar, boolean isPortrait, Rect windowRect) {
         // status bar
-        mStatusBarHeight = isHideStatusBar ? 0 : mBaseStatusBarHeight;
-        // touch X offset(navigation bar is displayed and it is on the left side of the device)
-        mTouchXOffset = !isHideNavigationBar && hasTouchXOffset ? mBaseNavigationBarRotatedHeight : 0;
+        updateStatusBarHeight(isHideStatusBar, isPortrait);
+        // touch X offset(support Cutout)
+        updateTouchXOffset(isHideNavigationBar, windowRect.left);
+        // touch Y offset(support Cutout)
+        mTouchYOffset = isPortrait ? mSafeInsetRect.top : 0;
         // navigation bar
-        updateNavigationBarOffset(isHideNavigationBar, isPortrait);
+        updateNavigationBarOffset(isHideNavigationBar, isPortrait, windowRect);
         refreshLimitRect();
+    }
+
+    /**
+     * Update height of StatusBar.
+     *
+     * @param isHideStatusBar If true, the status bar is hidden
+     * @param isPortrait      If true, the device orientation is portrait
+     */
+    private void updateStatusBarHeight(boolean isHideStatusBar, boolean isPortrait) {
+        if (isHideStatusBar) {
+            // 1.(No Cutout)No StatusBar(=0)
+            // 2.(Has Cutout)StatusBar is not included in mMetrics.heightPixels (=0)
+            mStatusBarHeight = 0;
+            return;
+        }
+
+        // Has Cutout
+        final boolean hasTopCutout = mSafeInsetRect.top != 0;
+        if (hasTopCutout) {
+            if (isPortrait) {
+                mStatusBarHeight = 0;
+            } else {
+                mStatusBarHeight = mBaseStatusBarRotatedHeight;
+            }
+            return;
+        }
+
+        // No cutout
+        if (isPortrait) {
+            mStatusBarHeight = mBaseStatusBarHeight;
+        } else {
+            mStatusBarHeight = mBaseStatusBarRotatedHeight;
+        }
+    }
+
+    /**
+     * Update of touch X coordinate
+     *
+     * @param isHideNavigationBar If true, the navigation bar is hidden
+     * @param windowLeftOffset    Left side offset of device display
+     */
+    private void updateTouchXOffset(boolean isHideNavigationBar, int windowLeftOffset) {
+        final boolean hasBottomCutout = mSafeInsetRect.bottom != 0;
+        if (hasBottomCutout) {
+            mTouchXOffset = windowLeftOffset;
+            return;
+        }
+
+        // No cutout
+        // touch X offset(navigation bar is displayed and it is on the left side of the device)
+        mTouchXOffset = !isHideNavigationBar && windowLeftOffset > 0 ? mBaseNavigationBarRotatedHeight : 0;
     }
 
     /**
@@ -563,17 +638,54 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      *
      * @param isHideNavigationBar If true, the navigation bar is hidden
      * @param isPortrait          If true, the device orientation is portrait
+     * @param windowRect          {@link Rect} of system window
      */
-    private void updateNavigationBarOffset(boolean isHideNavigationBar, boolean isPortrait) {
+    private void updateNavigationBarOffset(boolean isHideNavigationBar, boolean isPortrait, Rect windowRect) {
+        int currentNavigationBarHeight = 0;
+        int currentNavigationBarWidth = 0;
+        int navigationBarVerticalDiff = 0;
+        final boolean hasSoftNavigationBar = hasSoftNavigationBar();
+        // auto hide navigation bar(Galaxy S8, S9 and so on.)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            final DisplayMetrics realDisplayMetrics = new DisplayMetrics();
+            mWindowManager.getDefaultDisplay().getRealMetrics(realDisplayMetrics);
+            currentNavigationBarHeight = realDisplayMetrics.heightPixels - windowRect.bottom;
+            currentNavigationBarWidth = realDisplayMetrics.widthPixels - mMetrics.widthPixels;
+            navigationBarVerticalDiff = mBaseNavigationBarHeight - currentNavigationBarHeight;
+        }
+
         if (!isHideNavigationBar) {
-            mNavigationBarVerticalOffset = 0;
+            // auto hide navigation bar
+            // 他デバイスとの矛盾をもとに推測する
+            // 1.デバイスに組み込まれたナビゲーションバー（mBaseNavigationBarHeight == 0）はシステムの状態によって高さに差が発生しない
+            // 2.デバイスに組み込まれたナビゲーションバー(!hasSoftNavigationBar)は意図的にBaseを0にしているので、矛盾している
+            if (navigationBarVerticalDiff != 0 && mBaseNavigationBarHeight == 0 ||
+                    !hasSoftNavigationBar && mBaseNavigationBarHeight != 0) {
+                if (hasSoftNavigationBar) {
+                    // 1.auto hide mode -> show mode
+                    // 2.show mode -> auto hide mode -> home
+                    mNavigationBarVerticalOffset = 0;
+                } else {
+                    // show mode -> home
+                    mNavigationBarVerticalOffset = -currentNavigationBarHeight;
+                }
+            } else {
+                // normal device
+                mNavigationBarVerticalOffset = 0;
+            }
+
             mNavigationBarHorizontalOffset = 0;
             return;
         }
 
         // If the portrait, is displayed at the bottom of the screen
         if (isPortrait) {
-            mNavigationBarVerticalOffset = mBaseNavigationBarHeight;
+            // auto hide navigation bar
+            if (!hasSoftNavigationBar && mBaseNavigationBarHeight != 0) {
+                mNavigationBarVerticalOffset = 0;
+            } else {
+                mNavigationBarVerticalOffset = mBaseNavigationBarHeight;
+            }
             mNavigationBarHorizontalOffset = 0;
             return;
         }
@@ -585,7 +697,17 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             mNavigationBarHorizontalOffset = 0;
         } else {
             mNavigationBarVerticalOffset = 0;
-            mNavigationBarHorizontalOffset = mBaseNavigationBarRotatedHeight;
+            // auto hide navigation bar
+            // 他デバイスとの矛盾をもとに推測する
+            // 1.デバイスに組み込まれたナビゲーションバー(!hasSoftNavigationBar)は、意図的にBaseを0にしているので、矛盾している
+            if (!hasSoftNavigationBar && mBaseNavigationBarRotatedHeight != 0) {
+                mNavigationBarHorizontalOffset = 0;
+            } else if (hasSoftNavigationBar && mBaseNavigationBarRotatedHeight == 0) {
+                // 2.ソフトナビゲーションバーの場合、Baseが設定されるため矛盾している
+                mNavigationBarHorizontalOffset = currentNavigationBarWidth;
+            } else {
+                mNavigationBarHorizontalOffset = mBaseNavigationBarRotatedHeight;
+            }
         }
     }
 
@@ -1327,7 +1449,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * @return FloatingViewのY座標
      */
     private int getYByTouch() {
-        return (int) (mMetrics.heightPixels + mNavigationBarVerticalOffset - (mScreenTouchY - mLocalTouchY + getHeight()));
+        return (int) (mMetrics.heightPixels + mNavigationBarVerticalOffset - (mScreenTouchY - mLocalTouchY + getHeight() - mTouchYOffset));
     }
 
     /**
@@ -1360,6 +1482,15 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
 
     int getState() {
         return mAnimationHandler.getState();
+    }
+
+    /**
+     * Set the cutout's safe inset area
+     *
+     * @param safeInsetRect {@link FloatingViewManager#setSafeInsetRect(Rect)}
+     */
+    void setSafeInsetRect(Rect safeInsetRect) {
+        mSafeInsetRect.set(safeInsetRect);
     }
 
     /**
@@ -1520,7 +1651,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
          * アニメーション時間から求められる位置を計算します。
          *
          * @param timeRate 時間比率
-         * @return ベースとなる係数(0.0から1.0＋α)
+         * @return ベースとなる係数(0.0から1.0 ＋ α)
          */
         private static float calcAnimationPosition(float timeRate) {
             final float position;

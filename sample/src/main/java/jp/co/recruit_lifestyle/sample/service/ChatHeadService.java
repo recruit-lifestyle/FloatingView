@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.DisplayMetrics;
@@ -27,6 +28,11 @@ public class ChatHeadService extends Service implements FloatingViewListener {
      * デバッグログ用のタグ
      */
     private static final String TAG = "ChatHeadService";
+
+    /**
+     * Intent key (Cutout safe area)
+     */
+    public static final String EXTRA_CUTOUT_SAFE_AREA = "cutout_safe_area";
 
     /**
      * 通知ID
@@ -63,6 +69,7 @@ public class ChatHeadService extends Service implements FloatingViewListener {
         mFloatingViewManager = new FloatingViewManager(this, this);
         mFloatingViewManager.setFixedTrashIconImage(R.drawable.ic_trash_fixed);
         mFloatingViewManager.setActionTrashIconImage(R.drawable.ic_trash_action);
+        mFloatingViewManager.setSafeInsetRect((Rect) intent.getParcelableExtra(EXTRA_CUTOUT_SAFE_AREA));
         final FloatingViewManager.Options options = new FloatingViewManager.Options();
         options.overMargin = (int) (16 * metrics.density);
         mFloatingViewManager.addViewToWindow(iconView, options);
