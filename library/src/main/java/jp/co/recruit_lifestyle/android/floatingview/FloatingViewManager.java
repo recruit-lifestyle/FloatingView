@@ -594,10 +594,12 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
      * @param view {@link View}
      */
     private void removeViewImmediate(View view) {
-        if (!ViewCompat.isAttachedToWindow(view)) {
-            return;
+        // fix #100(crashes on Android 8)
+        try {
+            mWindowManager.removeViewImmediate(view);
+        } catch (IllegalArgumentException e) {
+            //do nothing
         }
-        mWindowManager.removeViewImmediate(view);
     }
 
     /**
