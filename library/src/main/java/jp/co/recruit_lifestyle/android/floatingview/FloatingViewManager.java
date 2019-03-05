@@ -32,6 +32,7 @@ import android.view.DisplayCutout;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
@@ -616,8 +617,14 @@ public class FloatingViewManager implements ScreenChangedListener, View.OnTouchL
             return safeInsetRect;
         }
 
+        // Fix: getDisplayCutout() on a null object reference (issue #110)
+        final WindowInsets windowInsets = activity.getWindow().getDecorView().getRootWindowInsets();
+        if (windowInsets == null) {
+            return safeInsetRect;
+        }
+
         // set safeInsetRect
-        final DisplayCutout displayCutout = activity.getWindow().getDecorView().getRootWindowInsets().getDisplayCutout();
+        final DisplayCutout displayCutout = windowInsets.getDisplayCutout();
         if (displayCutout != null) {
             safeInsetRect.set(displayCutout.getSafeInsetLeft(), displayCutout.getSafeInsetTop(), displayCutout.getSafeInsetRight(), displayCutout.getSafeInsetBottom());
         }
