@@ -427,7 +427,8 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
         mParams.type = OVERLAY_TYPE;
         mParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS |
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         mParams.format = PixelFormat.TRANSLUCENT;
         // 左下の座標を0とする
         mParams.gravity = Gravity.LEFT | Gravity.BOTTOM;
