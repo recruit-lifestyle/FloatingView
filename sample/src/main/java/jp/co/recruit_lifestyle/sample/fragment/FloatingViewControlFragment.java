@@ -149,10 +149,6 @@ public class FloatingViewControlFragment extends Fragment {
             if (activity.getWindow().getAttributes().layoutInDisplayCutoutMode == WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER) {
                 throw new RuntimeException("'windowLayoutInDisplayCutoutMode' do not be set to 'never'");
             }
-            // 2. Do not set Activity to landscape
-            if (activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                throw new RuntimeException("Do not set Activity to landscape");
-            }
         }
 
         // launch service
