@@ -1,19 +1,19 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
     }
 }
 
 dependencies {
-    implementation 'com.android.support:support-annotations:28.0.0'
-    implementation 'com.android.support:support-compat:28.0.0'
-    implementation 'com.android.support:support-dynamic-animation:28.0.0'
+    implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'androidx.core:core:1.1.0'
+    implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
 }
 
 // build a jar with source files

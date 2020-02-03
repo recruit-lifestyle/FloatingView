@@ -6,19 +6,19 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import jp.co.recruit.floatingview.R;
 import jp.co.recruit_lifestyle.android.floatingview.FloatingViewManager;
@@ -148,10 +148,6 @@ public class FloatingViewControlFragment extends Fragment {
             // 1. 'windowLayoutInDisplayCutoutMode' do not be set to 'never'
             if (activity.getWindow().getAttributes().layoutInDisplayCutoutMode == WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER) {
                 throw new RuntimeException("'windowLayoutInDisplayCutoutMode' do not be set to 'never'");
-            }
-            // 2. Do not set Activity to landscape
-            if (activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                throw new RuntimeException("Do not set Activity to landscape");
             }
         }
 

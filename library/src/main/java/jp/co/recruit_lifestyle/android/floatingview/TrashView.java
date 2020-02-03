@@ -28,7 +28,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
-import android.support.annotation.IntDef;
+import androidx.annotation.IntDef;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.MotionEvent;

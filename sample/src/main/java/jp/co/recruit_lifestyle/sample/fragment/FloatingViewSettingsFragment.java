@@ -2,7 +2,7 @@ package jp.co.recruit_lifestyle.sample.fragment;
 
 
 import android.os.Bundle;
-import android.support.v7.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceFragmentCompat;
 
 import jp.co.recruit.floatingview.R;
 
