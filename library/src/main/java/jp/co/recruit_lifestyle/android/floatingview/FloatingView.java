@@ -784,20 +784,35 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
      * {@inheritDoc}
      */
     @Override
-    public boolean dispatchTouchEvent(@NonNull MotionEvent event) {
+    public boolean onInterceptTouchEvent(@NonNull MotionEvent event) {
+        return dispatchTouchEvent(event, true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean onTouchEvent(@NonNull MotionEvent event) {
+        return dispatchTouchEvent(event, false);
+    }
+
+    /**
+     * Use onInterceptTouchEvent to detect FloatView move then onTouchEvent consume event
+     */
+    private boolean dispatchTouchEvent(@NonNull MotionEvent event, boolean isOnInterceptTouchEvent) {
         // Viewが表示されていなければ何もしない
         if (getVisibility() != View.VISIBLE) {
-            return true;
+            return false;
         }
 
         // タッチ不能な場合は何もしない
         if (!mIsDraggable) {
-            return true;
+            return false;
         }
 
         // Block while initial display animation is running
         if (mIsInitialAnimationRunning) {
-            return true;
+            return false;
         }
 
         // 現在位置のキャッシュ
@@ -847,11 +862,11 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             }
             // 押下処理が行われていない場合は処理しない
             if (mTouchDownTime != event.getDownTime()) {
-                return true;
+                return !isOnInterceptTouchEvent;
             }
             // 移動受付状態でない、かつX,Y軸ともにしきい値よりも小さい場合
             if (!mIsMoveAccept && Math.abs(mScreenTouchX - mScreenTouchDownX) < mMoveThreshold && Math.abs(mScreenTouchY - mScreenTouchDownY) < mMoveThreshold) {
-                return true;
+                return !isOnInterceptTouchEvent;
             }
             mIsMoveAccept = true;
             mAnimationHandler.updateTouchPosition(getXByTouch(), getYByTouch());
@@ -887,10 +902,6 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
 
             // When ACTION_UP is done (when not pressed or moved)
             if (action == MotionEvent.ACTION_UP && !tmpIsLongPressed && !mIsMoveAccept) {
-                final int size = getChildCount();
-                for (int i = 0; i < size; i++) {
-                    getChildAt(i).performClick();
-                }
             } else {
                 // Make a move after checking whether it is finished or not
                 isWaitForMoveToEdge = true;
@@ -912,7 +923,7 @@ class FloatingView extends FrameLayout implements ViewTreeObserver.OnPreDrawList
             }
         }
 
-        return true;
+        return !isOnInterceptTouchEvent || mIsMoveAccept;
     }
 
     /**
